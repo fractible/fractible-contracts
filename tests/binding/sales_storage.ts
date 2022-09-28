@@ -759,7 +759,7 @@ export class Sales_storage {
     async get_sales_value(key: sales_key): Promise<sales_value | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.sales), key.to_mich(), sales_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.sales), key.to_mich(), sales_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return mich_to_sales_value(data, true);
             }
@@ -772,7 +772,7 @@ export class Sales_storage {
     async has_sales_value(key: sales_key): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.sales), key.to_mich(), sales_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.sales), key.to_mich(), sales_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -785,7 +785,7 @@ export class Sales_storage {
     async get_bundle_sales_value(key: bundle_sales_key): Promise<bundle_sales_value | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.bundle_sales), key.to_mich(), bundle_sales_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.bundle_sales), key.to_mich(), bundle_sales_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return mich_to_bundle_sales_value(data, true);
             }
@@ -798,7 +798,7 @@ export class Sales_storage {
     async has_bundle_sales_value(key: bundle_sales_key): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.bundle_sales), key.to_mich(), bundle_sales_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.bundle_sales), key.to_mich(), bundle_sales_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -811,7 +811,7 @@ export class Sales_storage {
     async get_metadata_value(key: string): Promise<ex.Bytes | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("bytes", []));
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("string", [])), collapsed = true;
             if (data != undefined) {
                 return ex.mich_to_bytes(data);
             }
@@ -824,7 +824,7 @@ export class Sales_storage {
     async has_metadata_value(key: string): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("bytes", []));
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("string", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }

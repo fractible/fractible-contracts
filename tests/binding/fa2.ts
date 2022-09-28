@@ -619,7 +619,7 @@ export class Fa2 {
     async get_token_metadata_value(key: token_metadata_key): Promise<token_metadata_value | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.token_metadata), key.to_mich(), token_metadata_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.token_metadata), key.to_mich(), token_metadata_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return mich_to_token_metadata_value(data, true);
             }
@@ -632,7 +632,7 @@ export class Fa2 {
     async has_token_metadata_value(key: token_metadata_key): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.token_metadata), key.to_mich(), token_metadata_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.token_metadata), key.to_mich(), token_metadata_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -645,7 +645,7 @@ export class Fa2 {
     async get_ledger_value(key: ledger_key): Promise<ledger_value | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.ledger), key.to_mich(), ledger_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.ledger), key.to_mich(), ledger_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return mich_to_ledger_value(data, true);
             }
@@ -658,7 +658,7 @@ export class Fa2 {
     async has_ledger_value(key: ledger_key): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.ledger), key.to_mich(), ledger_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.ledger), key.to_mich(), ledger_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -671,7 +671,7 @@ export class Fa2 {
     async get_operator_value(key: operator_key): Promise<operator_value | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.operator), key.to_mich(), operator_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.operator), key.to_mich(), operator_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return mich_to_operator_value(data, true);
             }
@@ -684,7 +684,7 @@ export class Fa2 {
     async has_operator_value(key: operator_key): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.operator), key.to_mich(), operator_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.operator), key.to_mich(), operator_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -697,7 +697,7 @@ export class Fa2 {
     async get_operator_for_all_value(key: operator_for_all_key): Promise<operator_for_all_value | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.operator_for_all), key.to_mich(), operator_for_all_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.operator_for_all), key.to_mich(), operator_for_all_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return mich_to_operator_for_all_value(data, true);
             }
@@ -710,7 +710,7 @@ export class Fa2 {
     async has_operator_for_all_value(key: operator_for_all_key): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.operator_for_all), key.to_mich(), operator_for_all_key_mich_type);
+            const data = await ex.get_big_map_value(BigInt(storage.operator_for_all), key.to_mich(), operator_for_all_key_mich_type), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -723,7 +723,7 @@ export class Fa2 {
     async get_metadata_value(key: string): Promise<ex.Bytes | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("bytes", []));
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("string", [])), collapsed = true;
             if (data != undefined) {
                 return ex.mich_to_bytes(data);
             }
@@ -736,7 +736,7 @@ export class Fa2 {
     async has_metadata_value(key: string): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("bytes", []));
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), ex.string_to_mich(key), ex.prim_annot_to_mich_type("string", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }

@@ -391,9 +391,9 @@ export class Whitelist {
     async get_transfer_lists_value(key: ex.Nat): Promise<transfer_list | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), ex.prim_annot_to_mich_type("record", []));
+            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), ex.prim_annot_to_mich_type("nat", [])), collapsed = true;
             if (data != undefined) {
-                return mich_to_transfer_list(data, true);
+                return mich_to_transfer_list(data, collapsed);
             }
             else {
                 return undefined;
@@ -404,7 +404,7 @@ export class Whitelist {
     async has_transfer_lists_value(key: ex.Nat): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), ex.prim_annot_to_mich_type("record", []));
+            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), ex.prim_annot_to_mich_type("nat", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }
