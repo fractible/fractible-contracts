@@ -1,0 +1,351 @@
+[
+  {
+    "name": {
+      "original": "update_transfer_list",
+      "sanitized": "update_transfer_list",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%transfer_list_id",
+                "sanitized": "transfer_list_id",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%transfer_list_id",
+                    "sanitized": "transfer_list_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%u",
+                "sanitized": "u",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "option",
+                  {
+                    "tvar": [
+                      {
+                        "original": "%u",
+                        "sanitized": "u",
+                        "accessors": []
+                      },
+                      {
+                        "pair": [
+                          {
+                            "base": "bool"
+                          },
+                          {
+                            "unary": [
+                              "set",
+                              {
+                                "tvar": [
+                                  {
+                                    "original": "%transfer_list_id",
+                                    "sanitized": "transfer_list_id",
+                                    "accessors": []
+                                  },
+                                  {
+                                    "base": "nat"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "%transfer_list_id",
+      "sanitized": "transfer_list_id",
+      "accessors": []
+    },
+    "type": {
+      "base": "nat"
+    }
+  },
+  {
+    "name": {
+      "original": "unpause",
+      "sanitized": "unpause",
+      "accessors": []
+    },
+    "type": {
+      "base": "unit"
+    }
+  },
+  {
+    "name": {
+      "original": "update_user",
+      "sanitized": "update_user",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%user",
+                "sanitized": "user",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%user",
+                    "sanitized": "user",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%transfer_list_id",
+                "sanitized": "transfer_list_id",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "option",
+                  {
+                    "tvar": [
+                      {
+                        "original": "%transfer_list_id",
+                        "sanitized": "transfer_list_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "%unrestricted",
+      "sanitized": "unrestricted",
+      "accessors": []
+    },
+    "type": {
+      "base": "bool"
+    }
+  },
+  {
+    "name": {
+      "original": "%user",
+      "sanitized": "user",
+      "accessors": []
+    },
+    "type": {
+      "base": "address"
+    }
+  },
+  {
+    "name": {
+      "original": "type0",
+      "sanitized": "type0",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%unrestricted",
+                "sanitized": "unrestricted",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%unrestricted",
+                    "sanitized": "unrestricted",
+                    "accessors": []
+                  },
+                  {
+                    "base": "bool"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%allowed_transfer_lists",
+                "sanitized": "allowed_transfer_lists",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "set",
+                  {
+                    "tvar": [
+                      {
+                        "original": "%transfer_list_id",
+                        "sanitized": "transfer_list_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "assert_transfer_list",
+      "sanitized": "assert_transfer_list",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%from_transfer_list_id",
+                "sanitized": "from_transfer_list_id",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%transfer_list_id",
+                    "sanitized": "transfer_list_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%to_transfer_list_id",
+                "sanitized": "to_transfer_list_id",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%transfer_list_id",
+                    "sanitized": "transfer_list_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "get_user",
+      "sanitized": "get_user",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%user",
+                "sanitized": "user",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%user",
+                    "sanitized": "user",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%callback",
+                "sanitized": "callback",
+                "accessors": []
+              },
+              {
+                "contract": {
+                  "prim": "option",
+                  "args": [
+                    {
+                      "prim": "nat"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

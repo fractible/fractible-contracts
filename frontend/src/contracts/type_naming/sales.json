@@ -1,0 +1,1347 @@
+[
+  {
+    "name": {
+      "original": "sell",
+      "sanitized": "sell",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%s_asset_contract",
+                "sanitized": "s_asset_contract",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "set_transfer_manager",
+                    "sanitized": "set_transfer_manager",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%s_asset_token_id",
+                    "sanitized": "s_asset_token_id",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "set_protocol_fee",
+                        "sanitized": "set_protocol_fee",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "PairP": [
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%s_sale_type",
+                        "sanitized": "s_sale_type",
+                        "accessors": []
+                      },
+                      {
+                        "tvar": [
+                          {
+                            "original": "%s_sale_type",
+                            "sanitized": "s_sale_type",
+                            "accessors": []
+                          },
+                          {
+                            "base": "int"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "PairP": [
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%s_sale_asset",
+                            "sanitized": "s_sale_asset",
+                            "accessors": []
+                          },
+                          {
+                            "tvar": [
+                              {
+                                "original": "%sale_data",
+                                "sanitized": "sale_data",
+                                "accessors": []
+                              },
+                              {
+                                "base": "byte"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%s_sale",
+                            "sanitized": "s_sale",
+                            "accessors": []
+                          },
+                          {
+                            "tvar": [
+                              {
+                                "original": "%s_sale",
+                                "sanitized": "s_sale",
+                                "accessors": []
+                              },
+                              {
+                                "record": {
+                                  "PairP": [
+                                    {
+                                      "LeafP": [
+                                        {
+                                          "original": "%sale_origin_fees",
+                                          "sanitized": "sale_origin_fees",
+                                          "accessors": []
+                                        },
+                                        {
+                                          "unary": [
+                                            "list",
+                                            {
+                                              "tvar": [
+                                                {
+                                                  "original": "type0",
+                                                  "sanitized": "type0",
+                                                  "accessors": []
+                                                },
+                                                {
+                                                  "record": {
+                                                    "PairP": [
+                                                      {
+                                                        "LeafP": [
+                                                          {
+                                                            "original": "%part_account",
+                                                            "sanitized": "part_account",
+                                                            "accessors": []
+                                                          },
+                                                          {
+                                                            "tvar": [
+                                                              {
+                                                                "original": "set_transfer_manager",
+                                                                "sanitized": "set_transfer_manager",
+                                                                "accessors": []
+                                                              },
+                                                              {
+                                                                "base": "address"
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "LeafP": [
+                                                          {
+                                                            "original": "%part_value",
+                                                            "sanitized": "part_value",
+                                                            "accessors": []
+                                                          },
+                                                          {
+                                                            "tvar": [
+                                                              {
+                                                                "original": "set_protocol_fee",
+                                                                "sanitized": "set_protocol_fee",
+                                                                "accessors": []
+                                                              },
+                                                              {
+                                                                "base": "nat"
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "PairP": [
+                                        {
+                                          "LeafP": [
+                                            {
+                                              "original": "%sale_payouts",
+                                              "sanitized": "sale_payouts",
+                                              "accessors": []
+                                            },
+                                            {
+                                              "unary": [
+                                                "list",
+                                                {
+                                                  "tvar": [
+                                                    {
+                                                      "original": "type0",
+                                                      "sanitized": "type0",
+                                                      "accessors": []
+                                                    },
+                                                    {
+                                                      "record": {
+                                                        "PairP": [
+                                                          {
+                                                            "LeafP": [
+                                                              {
+                                                                "original": "%part_account",
+                                                                "sanitized": "part_account",
+                                                                "accessors": []
+                                                              },
+                                                              {
+                                                                "tvar": [
+                                                                  {
+                                                                    "original": "set_transfer_manager",
+                                                                    "sanitized": "set_transfer_manager",
+                                                                    "accessors": []
+                                                                  },
+                                                                  {
+                                                                    "base": "address"
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "LeafP": [
+                                                              {
+                                                                "original": "%part_value",
+                                                                "sanitized": "part_value",
+                                                                "accessors": []
+                                                              },
+                                                              {
+                                                                "tvar": [
+                                                                  {
+                                                                    "original": "set_protocol_fee",
+                                                                    "sanitized": "set_protocol_fee",
+                                                                    "accessors": []
+                                                                  },
+                                                                  {
+                                                                    "base": "nat"
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "PairP": [
+                                            {
+                                              "LeafP": [
+                                                {
+                                                  "original": "%sale_amount",
+                                                  "sanitized": "sale_amount",
+                                                  "accessors": []
+                                                },
+                                                {
+                                                  "tvar": [
+                                                    {
+                                                      "original": "set_protocol_fee",
+                                                      "sanitized": "set_protocol_fee",
+                                                      "accessors": []
+                                                    },
+                                                    {
+                                                      "base": "nat"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "PairP": [
+                                                {
+                                                  "LeafP": [
+                                                    {
+                                                      "original": "%sale_asset_qty",
+                                                      "sanitized": "sale_asset_qty",
+                                                      "accessors": []
+                                                    },
+                                                    {
+                                                      "tvar": [
+                                                        {
+                                                          "original": "set_protocol_fee",
+                                                          "sanitized": "set_protocol_fee",
+                                                          "accessors": []
+                                                        },
+                                                        {
+                                                          "base": "nat"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "PairP": [
+                                                    {
+                                                      "LeafP": [
+                                                        {
+                                                          "original": "%sale_start",
+                                                          "sanitized": "sale_start",
+                                                          "accessors": []
+                                                        },
+                                                        {
+                                                          "unary": [
+                                                            "option",
+                                                            {
+                                                              "tvar": [
+                                                                {
+                                                                  "original": "%sale_end",
+                                                                  "sanitized": "sale_end",
+                                                                  "accessors": []
+                                                                },
+                                                                {
+                                                                  "base": "timestamp"
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "PairP": [
+                                                        {
+                                                          "LeafP": [
+                                                            {
+                                                              "original": "%sale_end",
+                                                              "sanitized": "sale_end",
+                                                              "accessors": []
+                                                            },
+                                                            {
+                                                              "unary": [
+                                                                "option",
+                                                                {
+                                                                  "tvar": [
+                                                                    {
+                                                                      "original": "%sale_end",
+                                                                      "sanitized": "sale_end",
+                                                                      "accessors": []
+                                                                    },
+                                                                    {
+                                                                      "base": "timestamp"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "PairP": [
+                                                            {
+                                                              "LeafP": [
+                                                                {
+                                                                  "original": "%sale_max_fees_base_boint",
+                                                                  "sanitized": "sale_max_fees_base_boint",
+                                                                  "accessors": []
+                                                                },
+                                                                {
+                                                                  "tvar": [
+                                                                    {
+                                                                      "original": "set_protocol_fee",
+                                                                      "sanitized": "set_protocol_fee",
+                                                                      "accessors": []
+                                                                    },
+                                                                    {
+                                                                      "base": "nat"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "PairP": [
+                                                                {
+                                                                  "LeafP": [
+                                                                    {
+                                                                      "original": "%sale_data_type",
+                                                                      "sanitized": "sale_data_type",
+                                                                      "accessors": []
+                                                                    },
+                                                                    {
+                                                                      "unary": [
+                                                                        "option",
+                                                                        {
+                                                                          "tvar": [
+                                                                            {
+                                                                              "original": "%sale_data",
+                                                                              "sanitized": "sale_data",
+                                                                              "accessors": []
+                                                                            },
+                                                                            {
+                                                                              "base": "byte"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "LeafP": [
+                                                                    {
+                                                                      "original": "%sale_data",
+                                                                      "sanitized": "sale_data",
+                                                                      "accessors": []
+                                                                    },
+                                                                    {
+                                                                      "unary": [
+                                                                        "option",
+                                                                        {
+                                                                          "tvar": [
+                                                                            {
+                                                                              "original": "%sale_data",
+                                                                              "sanitized": "sale_data",
+                                                                              "accessors": []
+                                                                            },
+                                                                            {
+                                                                              "base": "byte"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "set_protocol_fee",
+      "sanitized": "set_protocol_fee",
+      "accessors": []
+    },
+    "type": {
+      "base": "nat"
+    }
+  },
+  {
+    "name": {
+      "original": "_default",
+      "sanitized": "_default",
+      "accessors": []
+    },
+    "type": {
+      "base": "unit"
+    }
+  },
+  {
+    "name": {
+      "original": "%sale_data",
+      "sanitized": "sale_data",
+      "accessors": []
+    },
+    "type": {
+      "base": "byte"
+    }
+  },
+  {
+    "name": {
+      "original": "type0",
+      "sanitized": "type0",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%part_account",
+                "sanitized": "part_account",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "set_transfer_manager",
+                    "sanitized": "set_transfer_manager",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%part_value",
+                "sanitized": "part_value",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "set_protocol_fee",
+                    "sanitized": "set_protocol_fee",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "set_transfer_manager",
+      "sanitized": "set_transfer_manager",
+      "accessors": []
+    },
+    "type": {
+      "base": "address"
+    }
+  },
+  {
+    "name": {
+      "original": "%sale_end",
+      "sanitized": "sale_end",
+      "accessors": []
+    },
+    "type": {
+      "base": "timestamp"
+    }
+  },
+  {
+    "name": {
+      "original": "cancel_sale",
+      "sanitized": "cancel_sale",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%cs_asset_contract",
+                "sanitized": "cs_asset_contract",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "set_transfer_manager",
+                    "sanitized": "set_transfer_manager",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%cs_asset_token_id",
+                    "sanitized": "cs_asset_token_id",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "set_protocol_fee",
+                        "sanitized": "set_protocol_fee",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "PairP": [
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%cs_sale_type",
+                        "sanitized": "cs_sale_type",
+                        "accessors": []
+                      },
+                      {
+                        "tvar": [
+                          {
+                            "original": "%s_sale_type",
+                            "sanitized": "s_sale_type",
+                            "accessors": []
+                          },
+                          {
+                            "base": "int"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%cs_sale_asset",
+                        "sanitized": "cs_sale_asset",
+                        "accessors": []
+                      },
+                      {
+                        "tvar": [
+                          {
+                            "original": "%sale_data",
+                            "sanitized": "sale_data",
+                            "accessors": []
+                          },
+                          {
+                            "base": "byte"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "buy",
+      "sanitized": "buy",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%b_asset_contract",
+                "sanitized": "b_asset_contract",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "set_transfer_manager",
+                    "sanitized": "set_transfer_manager",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%b_asset_token_id",
+                    "sanitized": "b_asset_token_id",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "set_protocol_fee",
+                        "sanitized": "set_protocol_fee",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "PairP": [
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%b_seller",
+                        "sanitized": "b_seller",
+                        "accessors": []
+                      },
+                      {
+                        "tvar": [
+                          {
+                            "original": "set_transfer_manager",
+                            "sanitized": "set_transfer_manager",
+                            "accessors": []
+                          },
+                          {
+                            "base": "address"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "PairP": [
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%b_sale_type",
+                            "sanitized": "b_sale_type",
+                            "accessors": []
+                          },
+                          {
+                            "tvar": [
+                              {
+                                "original": "%s_sale_type",
+                                "sanitized": "s_sale_type",
+                                "accessors": []
+                              },
+                              {
+                                "base": "int"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "PairP": [
+                          {
+                            "LeafP": [
+                              {
+                                "original": "%b_sale_asset",
+                                "sanitized": "b_sale_asset",
+                                "accessors": []
+                              },
+                              {
+                                "tvar": [
+                                  {
+                                    "original": "%sale_data",
+                                    "sanitized": "sale_data",
+                                    "accessors": []
+                                  },
+                                  {
+                                    "base": "byte"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "PairP": [
+                              {
+                                "LeafP": [
+                                  {
+                                    "original": "%b_amount",
+                                    "sanitized": "b_amount",
+                                    "accessors": []
+                                  },
+                                  {
+                                    "tvar": [
+                                      {
+                                        "original": "set_protocol_fee",
+                                        "sanitized": "set_protocol_fee",
+                                        "accessors": []
+                                      },
+                                      {
+                                        "base": "nat"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "PairP": [
+                                  {
+                                    "LeafP": [
+                                      {
+                                        "original": "%b_origin_fees",
+                                        "sanitized": "b_origin_fees",
+                                        "accessors": []
+                                      },
+                                      {
+                                        "unary": [
+                                          "list",
+                                          {
+                                            "tvar": [
+                                              {
+                                                "original": "type0",
+                                                "sanitized": "type0",
+                                                "accessors": []
+                                              },
+                                              {
+                                                "record": {
+                                                  "PairP": [
+                                                    {
+                                                      "LeafP": [
+                                                        {
+                                                          "original": "%part_account",
+                                                          "sanitized": "part_account",
+                                                          "accessors": []
+                                                        },
+                                                        {
+                                                          "tvar": [
+                                                            {
+                                                              "original": "set_transfer_manager",
+                                                              "sanitized": "set_transfer_manager",
+                                                              "accessors": []
+                                                            },
+                                                            {
+                                                              "base": "address"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "LeafP": [
+                                                        {
+                                                          "original": "%part_value",
+                                                          "sanitized": "part_value",
+                                                          "accessors": []
+                                                        },
+                                                        {
+                                                          "tvar": [
+                                                            {
+                                                              "original": "set_protocol_fee",
+                                                              "sanitized": "set_protocol_fee",
+                                                              "accessors": []
+                                                            },
+                                                            {
+                                                              "base": "nat"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "LeafP": [
+                                      {
+                                        "original": "%b_payouts",
+                                        "sanitized": "b_payouts",
+                                        "accessors": []
+                                      },
+                                      {
+                                        "unary": [
+                                          "list",
+                                          {
+                                            "tvar": [
+                                              {
+                                                "original": "type0",
+                                                "sanitized": "type0",
+                                                "accessors": []
+                                              },
+                                              {
+                                                "record": {
+                                                  "PairP": [
+                                                    {
+                                                      "LeafP": [
+                                                        {
+                                                          "original": "%part_account",
+                                                          "sanitized": "part_account",
+                                                          "accessors": []
+                                                        },
+                                                        {
+                                                          "tvar": [
+                                                            {
+                                                              "original": "set_transfer_manager",
+                                                              "sanitized": "set_transfer_manager",
+                                                              "accessors": []
+                                                            },
+                                                            {
+                                                              "base": "address"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "LeafP": [
+                                                        {
+                                                          "original": "%part_value",
+                                                          "sanitized": "part_value",
+                                                          "accessors": []
+                                                        },
+                                                        {
+                                                          "tvar": [
+                                                            {
+                                                              "original": "set_protocol_fee",
+                                                              "sanitized": "set_protocol_fee",
+                                                              "accessors": []
+                                                            },
+                                                            {
+                                                              "base": "nat"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "%s_sale_type",
+      "sanitized": "s_sale_type",
+      "accessors": []
+    },
+    "type": {
+      "base": "int"
+    }
+  },
+  {
+    "name": {
+      "original": "%s_sale",
+      "sanitized": "s_sale",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%sale_origin_fees",
+                "sanitized": "sale_origin_fees",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "list",
+                  {
+                    "tvar": [
+                      {
+                        "original": "type0",
+                        "sanitized": "type0",
+                        "accessors": []
+                      },
+                      {
+                        "record": {
+                          "PairP": [
+                            {
+                              "LeafP": [
+                                {
+                                  "original": "%part_account",
+                                  "sanitized": "part_account",
+                                  "accessors": []
+                                },
+                                {
+                                  "tvar": [
+                                    {
+                                      "original": "set_transfer_manager",
+                                      "sanitized": "set_transfer_manager",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "base": "address"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "LeafP": [
+                                {
+                                  "original": "%part_value",
+                                  "sanitized": "part_value",
+                                  "accessors": []
+                                },
+                                {
+                                  "tvar": [
+                                    {
+                                      "original": "set_protocol_fee",
+                                      "sanitized": "set_protocol_fee",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "base": "nat"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%sale_payouts",
+                    "sanitized": "sale_payouts",
+                    "accessors": []
+                  },
+                  {
+                    "unary": [
+                      "list",
+                      {
+                        "tvar": [
+                          {
+                            "original": "type0",
+                            "sanitized": "type0",
+                            "accessors": []
+                          },
+                          {
+                            "record": {
+                              "PairP": [
+                                {
+                                  "LeafP": [
+                                    {
+                                      "original": "%part_account",
+                                      "sanitized": "part_account",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "tvar": [
+                                        {
+                                          "original": "set_transfer_manager",
+                                          "sanitized": "set_transfer_manager",
+                                          "accessors": []
+                                        },
+                                        {
+                                          "base": "address"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "LeafP": [
+                                    {
+                                      "original": "%part_value",
+                                      "sanitized": "part_value",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "tvar": [
+                                        {
+                                          "original": "set_protocol_fee",
+                                          "sanitized": "set_protocol_fee",
+                                          "accessors": []
+                                        },
+                                        {
+                                          "base": "nat"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "PairP": [
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%sale_amount",
+                        "sanitized": "sale_amount",
+                        "accessors": []
+                      },
+                      {
+                        "tvar": [
+                          {
+                            "original": "set_protocol_fee",
+                            "sanitized": "set_protocol_fee",
+                            "accessors": []
+                          },
+                          {
+                            "base": "nat"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "PairP": [
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%sale_asset_qty",
+                            "sanitized": "sale_asset_qty",
+                            "accessors": []
+                          },
+                          {
+                            "tvar": [
+                              {
+                                "original": "set_protocol_fee",
+                                "sanitized": "set_protocol_fee",
+                                "accessors": []
+                              },
+                              {
+                                "base": "nat"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "PairP": [
+                          {
+                            "LeafP": [
+                              {
+                                "original": "%sale_start",
+                                "sanitized": "sale_start",
+                                "accessors": []
+                              },
+                              {
+                                "unary": [
+                                  "option",
+                                  {
+                                    "tvar": [
+                                      {
+                                        "original": "%sale_end",
+                                        "sanitized": "sale_end",
+                                        "accessors": []
+                                      },
+                                      {
+                                        "base": "timestamp"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "PairP": [
+                              {
+                                "LeafP": [
+                                  {
+                                    "original": "%sale_end",
+                                    "sanitized": "sale_end",
+                                    "accessors": []
+                                  },
+                                  {
+                                    "unary": [
+                                      "option",
+                                      {
+                                        "tvar": [
+                                          {
+                                            "original": "%sale_end",
+                                            "sanitized": "sale_end",
+                                            "accessors": []
+                                          },
+                                          {
+                                            "base": "timestamp"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "PairP": [
+                                  {
+                                    "LeafP": [
+                                      {
+                                        "original": "%sale_max_fees_base_boint",
+                                        "sanitized": "sale_max_fees_base_boint",
+                                        "accessors": []
+                                      },
+                                      {
+                                        "tvar": [
+                                          {
+                                            "original": "set_protocol_fee",
+                                            "sanitized": "set_protocol_fee",
+                                            "accessors": []
+                                          },
+                                          {
+                                            "base": "nat"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "PairP": [
+                                      {
+                                        "LeafP": [
+                                          {
+                                            "original": "%sale_data_type",
+                                            "sanitized": "sale_data_type",
+                                            "accessors": []
+                                          },
+                                          {
+                                            "unary": [
+                                              "option",
+                                              {
+                                                "tvar": [
+                                                  {
+                                                    "original": "%sale_data",
+                                                    "sanitized": "sale_data",
+                                                    "accessors": []
+                                                  },
+                                                  {
+                                                    "base": "byte"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "LeafP": [
+                                          {
+                                            "original": "%sale_data",
+                                            "sanitized": "sale_data",
+                                            "accessors": []
+                                          },
+                                          {
+                                            "unary": [
+                                              "option",
+                                              {
+                                                "tvar": [
+                                                  {
+                                                    "original": "%sale_data",
+                                                    "sanitized": "sale_data",
+                                                    "accessors": []
+                                                  },
+                                                  {
+                                                    "base": "byte"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

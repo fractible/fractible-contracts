@@ -1,0 +1,1019 @@
+[
+  {
+    "name": {
+      "original": "%add_operator",
+      "sanitized": "add_operator",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%owner",
+                "sanitized": "owner",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%add_for_all",
+                    "sanitized": "add_for_all",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%operator",
+                    "sanitized": "operator",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "%add_for_all",
+                        "sanitized": "add_for_all",
+                        "accessors": []
+                      },
+                      {
+                        "base": "address"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "LeafP": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "%token_id",
+                        "sanitized": "token_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "balance_of",
+      "sanitized": "balance_of",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%requests",
+                "sanitized": "requests",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "list",
+                  {
+                    "tvar": [
+                      {
+                        "original": "type4",
+                        "sanitized": "type4",
+                        "accessors": []
+                      },
+                      {
+                        "record": {
+                          "PairP": [
+                            {
+                              "LeafP": [
+                                {
+                                  "original": "%owner",
+                                  "sanitized": "owner",
+                                  "accessors": []
+                                },
+                                {
+                                  "tvar": [
+                                    {
+                                      "original": "%add_for_all",
+                                      "sanitized": "add_for_all",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "base": "address"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "LeafP": [
+                                {
+                                  "original": "%token_id",
+                                  "sanitized": "token_id",
+                                  "accessors": []
+                                },
+                                {
+                                  "tvar": [
+                                    {
+                                      "original": "%token_id",
+                                      "sanitized": "token_id",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "base": "nat"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%callback",
+                "sanitized": "callback",
+                "accessors": []
+              },
+              {
+                "contract": {
+                  "prim": "list",
+                  "args": [
+                    {
+                      "prim": "pair",
+                      "args": [
+                        {
+                          "prim": "pair",
+                          "args": [
+                            {
+                              "prim": "address",
+                              "annots": [
+                                "%owner"
+                              ]
+                            },
+                            {
+                              "prim": "nat",
+                              "annots": [
+                                "%token_id"
+                              ]
+                            }
+                          ],
+                          "annots": [
+                            "%request"
+                          ]
+                        },
+                        {
+                          "prim": "nat",
+                          "annots": [
+                            "%balance"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "%token_id",
+      "sanitized": "token_id",
+      "accessors": []
+    },
+    "type": {
+      "base": "nat"
+    }
+  },
+  {
+    "name": {
+      "original": "burn",
+      "sanitized": "burn",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%tid",
+                "sanitized": "tid",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%nbt",
+                "sanitized": "nbt",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "unpause",
+      "sanitized": "unpause",
+      "accessors": []
+    },
+    "type": {
+      "base": "unit"
+    }
+  },
+  {
+    "name": {
+      "original": "%d",
+      "sanitized": "d",
+      "accessors": []
+    },
+    "type": {
+      "base": "byte"
+    }
+  },
+  {
+    "name": {
+      "original": "type0",
+      "sanitized": "type0",
+      "accessors": []
+    },
+    "type": {
+      "or": [
+        {
+          "annot": [
+            {
+              "base": "address"
+            },
+            {
+              "original": "%add_for_all",
+              "sanitized": "add_for_all",
+              "accessors": []
+            }
+          ]
+        },
+        {
+          "annot": [
+            {
+              "base": "address"
+            },
+            {
+              "original": "%remove_for_all",
+              "sanitized": "remove_for_all",
+              "accessors": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": {
+      "original": "%paused",
+      "sanitized": "paused",
+      "accessors": []
+    },
+    "type": {
+      "base": "bool"
+    }
+  },
+  {
+    "name": {
+      "original": "type5",
+      "sanitized": "type5",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%token_id",
+                "sanitized": "token_id",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%token_info",
+                "sanitized": "token_info",
+                "accessors": []
+              },
+              {
+                "binary": [
+                  "map",
+                  [
+                    {
+                      "tvar": [
+                        {
+                          "original": "%k",
+                          "sanitized": "k",
+                          "accessors": []
+                        },
+                        {
+                          "base": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "tvar": [
+                        {
+                          "original": "%d",
+                          "sanitized": "d",
+                          "accessors": []
+                        },
+                        {
+                          "base": "byte"
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "%add_for_all",
+      "sanitized": "add_for_all",
+      "accessors": []
+    },
+    "type": {
+      "base": "address"
+    }
+  },
+  {
+    "name": {
+      "original": "set_metadata",
+      "sanitized": "set_metadata",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%k",
+                "sanitized": "k",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%k",
+                    "sanitized": "k",
+                    "accessors": []
+                  },
+                  {
+                    "base": "string"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%d",
+                "sanitized": "d",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "option",
+                  {
+                    "tvar": [
+                      {
+                        "original": "%d",
+                        "sanitized": "d",
+                        "accessors": []
+                      },
+                      {
+                        "base": "byte"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "set_token_metadata",
+      "sanitized": "set_token_metadata",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%tid",
+                "sanitized": "tid",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%tdata",
+                "sanitized": "tdata",
+                "accessors": []
+              },
+              {
+                "binary": [
+                  "map",
+                  [
+                    {
+                      "base": "string"
+                    },
+                    {
+                      "base": "byte"
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "mint",
+      "sanitized": "mint",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%tow",
+                "sanitized": "tow",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%add_for_all",
+                    "sanitized": "add_for_all",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%tid",
+                    "sanitized": "tid",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "%token_id",
+                        "sanitized": "token_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "LeafP": [
+                  {
+                    "original": "%nbt",
+                    "sanitized": "nbt",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "%token_id",
+                        "sanitized": "token_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "%k",
+      "sanitized": "k",
+      "accessors": []
+    },
+    "type": {
+      "base": "string"
+    }
+  },
+  {
+    "name": {
+      "original": "type4",
+      "sanitized": "type4",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%owner",
+                "sanitized": "owner",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%add_for_all",
+                    "sanitized": "add_for_all",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%token_id",
+                "sanitized": "token_id",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "base": "nat"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "type3",
+      "sanitized": "type3",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%from_",
+                "sanitized": "from_",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%add_for_all",
+                    "sanitized": "add_for_all",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "LeafP": [
+              {
+                "original": "%txs",
+                "sanitized": "txs",
+                "accessors": []
+              },
+              {
+                "unary": [
+                  "list",
+                  {
+                    "tvar": [
+                      {
+                        "original": "type2",
+                        "sanitized": "type2",
+                        "accessors": []
+                      },
+                      {
+                        "record": {
+                          "PairP": [
+                            {
+                              "LeafP": [
+                                {
+                                  "original": "%to_",
+                                  "sanitized": "to_",
+                                  "accessors": []
+                                },
+                                {
+                                  "tvar": [
+                                    {
+                                      "original": "%add_for_all",
+                                      "sanitized": "add_for_all",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "base": "address"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "PairP": [
+                                {
+                                  "LeafP": [
+                                    {
+                                      "original": "%token_id",
+                                      "sanitized": "token_id",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "tvar": [
+                                        {
+                                          "original": "%token_id",
+                                          "sanitized": "token_id",
+                                          "accessors": []
+                                        },
+                                        {
+                                          "base": "nat"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "LeafP": [
+                                    {
+                                      "original": "%amount",
+                                      "sanitized": "amount",
+                                      "accessors": []
+                                    },
+                                    {
+                                      "tvar": [
+                                        {
+                                          "original": "%token_id",
+                                          "sanitized": "token_id",
+                                          "accessors": []
+                                        },
+                                        {
+                                          "base": "nat"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": {
+      "original": "type1",
+      "sanitized": "type1",
+      "accessors": []
+    },
+    "type": {
+      "or": [
+        {
+          "annot": [
+            {
+              "record": {
+                "PairP": [
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%owner",
+                        "sanitized": "owner",
+                        "accessors": []
+                      },
+                      {
+                        "base": "address"
+                      }
+                    ]
+                  },
+                  {
+                    "PairP": [
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%operator",
+                            "sanitized": "operator",
+                            "accessors": []
+                          },
+                          {
+                            "base": "address"
+                          }
+                        ]
+                      },
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%token_id",
+                            "sanitized": "token_id",
+                            "accessors": []
+                          },
+                          {
+                            "base": "nat"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "original": "%add_operator",
+              "sanitized": "%add_operator",
+              "accessors": []
+            }
+          ]
+        },
+        {
+          "annot": [
+            {
+              "record": {
+                "PairP": [
+                  {
+                    "LeafP": [
+                      {
+                        "original": "%owner",
+                        "sanitized": "owner",
+                        "accessors": []
+                      },
+                      {
+                        "base": "address"
+                      }
+                    ]
+                  },
+                  {
+                    "PairP": [
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%operator",
+                            "sanitized": "operator",
+                            "accessors": []
+                          },
+                          {
+                            "base": "address"
+                          }
+                        ]
+                      },
+                      {
+                        "LeafP": [
+                          {
+                            "original": "%token_id",
+                            "sanitized": "token_id",
+                            "accessors": []
+                          },
+                          {
+                            "base": "nat"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "original": "%remove_operator",
+              "sanitized": "%remove_operator",
+              "accessors": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": {
+      "original": "type2",
+      "sanitized": "type2",
+      "accessors": []
+    },
+    "type": {
+      "record": {
+        "PairP": [
+          {
+            "LeafP": [
+              {
+                "original": "%to_",
+                "sanitized": "to_",
+                "accessors": []
+              },
+              {
+                "tvar": [
+                  {
+                    "original": "%add_for_all",
+                    "sanitized": "add_for_all",
+                    "accessors": []
+                  },
+                  {
+                    "base": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "PairP": [
+              {
+                "LeafP": [
+                  {
+                    "original": "%token_id",
+                    "sanitized": "token_id",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "%token_id",
+                        "sanitized": "token_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "LeafP": [
+                  {
+                    "original": "%amount",
+                    "sanitized": "amount",
+                    "accessors": []
+                  },
+                  {
+                    "tvar": [
+                      {
+                        "original": "%token_id",
+                        "sanitized": "token_id",
+                        "accessors": []
+                      },
+                      {
+                        "base": "nat"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

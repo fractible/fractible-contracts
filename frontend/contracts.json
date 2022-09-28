@@ -1,0 +1,31 @@
+{
+  "contracts": [
+    {
+      "contract_name": "whitelist",
+      "original_format": "kT1",
+      "original_kt1": [
+        "KT1Lp1fjXqFot2qNVFeJecSfqDNVUSYfwf9A",
+        "ghostnet"
+      ],
+      "import_date": "28/9/122 21:53:16"
+    },
+    {
+      "contract_name": "nft",
+      "original_format": "kT1",
+      "original_kt1": [
+        "KT1CYte91EQcHzMX9vdTRUjyLycFQLiHSBWN",
+        "ghostnet"
+      ],
+      "import_date": "28/9/122 21:52:55"
+    },
+    {
+      "contract_name": "sales",
+      "original_format": "kT1",
+      "original_kt1": [
+        "KT1XqWrpTZ1DCN4u7ciFQ7fV9wRxoi2yxoq2",
+        "ghostnet"
+      ],
+      "import_date": "28/9/122 21:48:1"
+    }
+  ]
+}
