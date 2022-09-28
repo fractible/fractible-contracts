@@ -110,14 +110,17 @@ describe('Set up', async () => {
 
 describe('Sell NFT', async () => {
   it('Sell NFT as Alice should succeed', async () => {
-    await sales.sell(fa2.get_address(), new Nat(0), new Nat(0), new Bytes(""), new sale([], [], new Nat(10000), new Nat(10), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
+    await sales.sell(fa2.get_address(), new Nat(0), new Nat(0), new Bytes(""), new sale([], [], new Nat(100000), new Nat(10), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
       { as: alice }
     );
   });
 });
 
 describe('Buy NFT', async () => {
-  it('Buy NFT as Daniel should fail', async () => {
-    await sales.buy(fa2.get_address(), new Nat(0), alice.get_address(), new Nat(0), new Bytes(""), new Nat(1), [], [], { as: alice, amount: new Tez(10000) });
+  it('Buy NFT as User1 should fail', async () => {
+    await sales.buy(fa2.get_address(), new Nat(0), alice.get_address(), new Nat(0), new Bytes(""), new Nat(1), [], [], { as: user1, amount: new Tez(0.1) });
+  });
+  it('Buy NFT as Bob should succeed', async () => {
+    await sales.buy(fa2.get_address(), new Nat(0), alice.get_address(), new Nat(0), new Bytes(""), new Nat(1), [], [], { as: bob, amount: new Tez(0.1) });
   });
 });

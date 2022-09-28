@@ -351,6 +351,9 @@ const set_metadata_arg_to_mich = (k: string, d: ex.Option<ex.Bytes>): ex.Micheli
         d.to_mich()
     ]);
 }
+const set_whitelist_arg_to_mich = (whitelist_contract: ex.Address): ex.Micheline => {
+    return whitelist_contract.to_mich();
+}
 const set_token_metadata_arg_to_mich = (tid: ex.Nat, tdata: Array<[
     string,
     ex.Bytes
@@ -371,11 +374,6 @@ const update_operators_arg_to_mich = (upl: Array<ex.Or<operator_param, operator_
 }
 const update_operators_for_all_arg_to_mich = (upl: Array<update_for_all_op>): ex.Micheline => {
     return ex.list_to_mich(upl, x => {
-        return x.to_mich();
-    });
-}
-const do_transfer_arg_to_mich = (txs: Array<transfer_param>): ex.Micheline => {
-    return ex.list_to_mich(txs, x => {
         return x.to_mich();
     });
 }
@@ -426,9 +424,10 @@ export class Fa2 {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(owner: ex.Address, params: Partial<ex.Parameters>) {
+    async deploy(owner: ex.Address, whitelist: ex.Address, params: Partial<ex.Parameters>) {
         const address = await ex.deploy("./contracts/fa2.arl", {
-            owner: owner.to_mich()
+            owner: owner.to_mich(),
+            whitelist: whitelist.to_mich()
         }, params);
         this.address = address;
         this.balance_of_callback_address = await deploy_balance_of_callback();
@@ -463,6 +462,12 @@ export class Fa2 {
         }
         throw new Error("Contract not initialised");
     }
+    async set_whitelist(whitelist_contract: ex.Address, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "set_whitelist", set_whitelist_arg_to_mich(whitelist_contract), params);
+        }
+        throw new Error("Contract not initialised");
+    }
     async set_token_metadata(tid: ex.Nat, tdata: Array<[
         string,
         ex.Bytes
@@ -481,12 +486,6 @@ export class Fa2 {
     async update_operators_for_all(upl: Array<update_for_all_op>, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "update_operators_for_all", update_operators_for_all_arg_to_mich(upl), params);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async do_transfer(txs: Array<transfer_param>, params: Partial<ex.Parameters>): Promise<any> {
-        if (this.address != undefined) {
-            return await ex.call(this.address, "do_transfer", do_transfer_arg_to_mich(txs), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -538,6 +537,12 @@ export class Fa2 {
         }
         throw new Error("Contract not initialised");
     }
+    async get_set_whitelist_param(whitelist_contract: ex.Address, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "set_whitelist", set_whitelist_arg_to_mich(whitelist_contract), params);
+        }
+        throw new Error("Contract not initialised");
+    }
     async get_set_token_metadata_param(tid: ex.Nat, tdata: Array<[
         string,
         ex.Bytes
@@ -556,12 +561,6 @@ export class Fa2 {
     async get_update_operators_for_all_param(upl: Array<update_for_all_op>, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "update_operators_for_all", update_operators_for_all_arg_to_mich(upl), params);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async get_do_transfer_param(txs: Array<transfer_param>, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
-        if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "do_transfer", do_transfer_arg_to_mich(txs), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -599,6 +598,13 @@ export class Fa2 {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
             return new ex.Address(storage.owner);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_whitelist(): Promise<ex.Address> {
+        if (this.address != undefined) {
+            const storage = await ex.get_storage(this.address);
+            return new ex.Address(storage.whitelist);
         }
         throw new Error("Contract not initialised");
     }
@@ -752,6 +758,7 @@ export class Fa2 {
         FA2_INSUFFICIENT_BALANCE: ex.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
         fa2_r5: ex.pair_to_mich([ex.string_to_mich("\"INVALID_CONDITION\""), ex.string_to_mich("\"fa2_r5\"")]),
         INVALID_CALLER: ex.string_to_mich("\"INVALID_CALLER\""),
+        ASSERT_TRANSFER_FAILED: ex.string_to_mich("\"ASSERT_TRANSFER_FAILED\""),
         FA2_NOT_OPERATOR: ex.string_to_mich("\"FA2_NOT_OPERATOR\""),
         fa2_r4: ex.pair_to_mich([ex.string_to_mich("\"INVALID_CONDITION\""), ex.string_to_mich("\"fa2_r4\"")]),
         fa2_r2: ex.pair_to_mich([ex.string_to_mich("\"INVALID_CONDITION\""), ex.string_to_mich("\"fa2_r2\"")]),

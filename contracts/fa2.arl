@@ -215,7 +215,7 @@ entry %transfer (txs : list<transfer_param>) {
       const %from = tx.tp_from;
       const tds   = tx.tp_txs;
       for td in tds do begin
-        const is_authorized ?= call_view<string>(self_address, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
+        const is_authorized ?= call_view<string>(whitelist, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
         do_require(is_authorized = "", is_authorized);
         const tid = td.token_id_dest;
         const amount = ledger[(%from, tid)]?.lamount ? the : 0;

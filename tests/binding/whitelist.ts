@@ -49,6 +49,9 @@ const add_super_user_arg_to_mich = (su: ex.Address): ex.Micheline => {
 const remove_super_user_arg_to_mich = (su: ex.Address): ex.Micheline => {
     return su.to_mich();
 }
+const set_users_contract_arg_to_mich = (users_contract: ex.Address): ex.Micheline => {
+    return users_contract.to_mich();
+}
 const add_whitelister_arg_to_mich = (v: ex.Address): ex.Micheline => {
     return v.to_mich();
 }
@@ -171,6 +174,12 @@ export class Whitelist {
         }
         throw new Error("Contract not initialised");
     }
+    async set_users_contract(users_contract: ex.Address, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "set_users_contract", set_users_contract_arg_to_mich(users_contract), params);
+        }
+        throw new Error("Contract not initialised");
+    }
     async add_whitelister(v: ex.Address, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "add_whitelister", add_whitelister_arg_to_mich(v), params);
@@ -261,6 +270,12 @@ export class Whitelist {
     async get_remove_super_user_param(su: ex.Address, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "remove_super_user", remove_super_user_arg_to_mich(su), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_set_users_contract_param(users_contract: ex.Address, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "set_users_contract", set_users_contract_arg_to_mich(users_contract), params);
         }
         throw new Error("Contract not initialised");
     }
