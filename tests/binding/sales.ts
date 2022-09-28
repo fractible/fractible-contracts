@@ -375,7 +375,7 @@ const sell_arg_to_mich = (s_asset_contract: ex.Address, s_asset_token_id: ex.Nat
         s_sale.to_mich()
     ]);
 }
-const buy_arg_to_mich = (b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: asset_type, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>): ex.Micheline => {
+const buy_arg_to_mich = (b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: ex.Nat, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>): ex.Micheline => {
     return ex.pair_to_mich([
         b_asset_contract.to_mich(),
         b_asset_token_id.to_mich(),
@@ -479,7 +479,7 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async buy(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: asset_type, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<any> {
+    async buy(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: ex.Nat, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "buy", buy_arg_to_mich(b_asset_contract, b_asset_token_id, b_seller, b_sale_type, b_sale_asset, b_amount, b_origin_fees, b_payouts), params);
         }
@@ -551,7 +551,7 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async get_buy_param(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: asset_type, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
+    async get_buy_param(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: ex.Nat, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "buy", buy_arg_to_mich(b_asset_contract, b_asset_token_id, b_seller, b_sale_type, b_sale_asset, b_amount, b_origin_fees, b_payouts), params);
         }

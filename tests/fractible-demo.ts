@@ -1,4 +1,4 @@
-import { blake2b, Bytes, expect_to_fail, get_account, Key, Nat, Option, Or, pair_to_mich, set_mockup, set_mockup_now, set_quiet, Signature, string_to_mich } from '@completium/experiment-ts'
+import { blake2b, Bytes, expect_to_fail, get_account, Key, Nat, Option, Or, pair_to_mich, set_mockup, set_mockup_now, set_quiet, Signature, string_to_mich, Tez } from '@completium/experiment-ts'
 import { fa2, operator_param } from './binding/fa2';
 
 
@@ -29,7 +29,7 @@ set_mockup()
 
 /* Verbose mode ------------------------------------------------------------ */
 
-set_quiet(false);
+set_quiet(true);
 
 /* Now --------------------------------------------------------------------- */
 
@@ -43,9 +43,7 @@ set_mockup_now(now)
 
 /* Scenarios --------------------------------------------------------------- */
 describe('Contracts deployment', async () => {
-  it('NFT contract deployment should succeed', async () => {
-    await fa2.deploy(alice.get_address(),  { as: alice })
-  });
+
   it('Royalties contract deployment should succeed', async () => {
     await royalties.deploy(alice.get_address(),  { as: alice })
   });
@@ -63,6 +61,9 @@ describe('Contracts deployment', async () => {
   });
   it('Sales contract deployment should succeed', async () => {
     await sales.deploy(alice.get_address(), new Nat(0), transfer_manager.get_address(), sales_storage.get_address(),  { as: alice })
+  });
+  it('NFT contract deployment should succeed', async () => {
+    await fa2.deploy(alice.get_address(), whitelist.get_address(), { as: alice })
   });
 });
 
@@ -108,9 +109,15 @@ describe('Set up', async () => {
 });
 
 describe('Sell NFT', async () => {
-  it('Sell NFT as Alice', async () => {
-    await sales.sell(fa2.get_address(), new Nat(0), new Nat(0), new Bytes(""), new sale([], [], new Nat(10000), new Nat(1), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
+  it('Sell NFT as Alice should succeed', async () => {
+    await sales.sell(fa2.get_address(), new Nat(0), new Nat(0), new Bytes(""), new sale([], [], new Nat(10000), new Nat(10), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
       { as: alice }
     );
+  });
+});
+
+describe('Buy NFT', async () => {
+  it('Buy NFT as Daniel should fail', async () => {
+    await sales.buy(fa2.get_address(), new Nat(0), alice.get_address(), new Nat(0), new Bytes(""), new Nat(1), [], [], { as: alice, amount: new Tez(10000) });
   });
 });

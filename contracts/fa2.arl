@@ -1,4 +1,4 @@
-archetype fa2(owner : address) with metadata "ipfs://QmQZuCnXe1g2WTvzPZXS15U5gfZu8eEMuPepMpaAyUPsAq"
+archetype fa2(owner : address, whitelist: address) with metadata "ipfs://QmQZuCnXe1g2WTvzPZXS15U5gfZu8eEMuPepMpaAyUPsAq"
 
 /* OWNERSHIP TRANSFER ------------------------------------------------------- */
 
@@ -57,6 +57,14 @@ entry set_metadata(k: string, d : option<bytes>) {
   require { md_r1 : is_not_paused() }
   effect {
     metadata.update(k, d)
+  }
+}
+
+/* WHITELIST ---------------------------------------------------------------- */
+entry set_whitelist(whitelist_contract: address) {
+  called by owner
+  effect {
+    whitelist := whitelist_contract
   }
 }
 
