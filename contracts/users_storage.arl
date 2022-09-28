@@ -1,0 +1,100 @@
+archetype users_storage(admin : address)
+with metadata ""
+
+constant MISSING_ADMIN_CANDIDATE  : string = "MISSING_ADMIN_CANDIDATE"
+constant INVALID_CALLER           : string = "INVALID_CALLER"
+
+//----------------------------------------------------------------------------
+// Metadata
+//----------------------------------------------------------------------------
+
+entry set_metadata_uri(idata : bytes) {
+  called by admin
+  effect {
+    metadata := put(metadata, "", idata)
+  }
+}
+
+//----------------------------------------------------------------------------
+// Admin role transfer
+//----------------------------------------------------------------------------
+
+variable admin_candidate : option<address>       = none
+
+entry declare_admin(candidate : address) {
+  called by admin
+  effect {
+    admin_candidate := some(candidate);
+  }
+}
+
+entry claim_admin() {
+  constant {
+    admin_candidate_addr ?is admin_candidate otherwise MISSING_ADMIN_CANDIDATE;
+  }
+  require {
+    co1: admin_candidate_addr = caller otherwise INVALID_CALLER
+  }
+  effect {
+    admin := admin_candidate_addr;
+    admin_candidate := none
+  }
+}
+
+//----------------------------------------------------------------------------
+// Whitelister role
+//----------------------------------------------------------------------------
+
+asset whitelister {
+  addr : address
+}
+
+entry add_whitelister(new_whitelister : address) {
+  called by admin
+  effect {
+    whitelister.add({ new_whitelister })
+  }
+}
+
+entry rm_whitelister(old_whitelister : address) {
+  called by admin
+  effect {
+    whitelister.remove(old_whitelister)
+  }
+}
+
+//----------------------------------------------------------------------------
+// Users storage
+//----------------------------------------------------------------------------
+
+variable users : big_map<address, nat> = []
+
+// READ
+view get_user_id(k : address) : option<nat> {
+    return users[k]
+}
+
+/**
+* Called by the cancel entrypoint of the Exchange contract.
+* It sets the value to none because a canceled order can never be filled again.
+*/
+entry remove(k : address) {
+  called by whitelister
+  effect {
+    users.remove(k)
+  }
+}
+
+entry put(k : address, v : nat) {
+  called by whitelister
+  effect {
+    users.put( k, v )
+  }
+}
+
+entry update(k : address, v : option<nat>) {
+  called by whitelister
+  effect {
+    users.update( k, v )
+  }
+}
