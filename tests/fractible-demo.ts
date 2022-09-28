@@ -7,7 +7,7 @@ const assert = require('assert');
 /* Contracts */
 
 import { royalties } from './binding/royalties';
-import { sales } from './binding/sales';
+import { asset_type, FA2, sale, sales, XTZ } from './binding/sales';
 import { sales_storage } from './binding/sales_storage';
 import { transfer_manager } from './binding/transfer_manager';
 import { users_storage } from './binding/users_storage';
@@ -29,7 +29,7 @@ set_mockup()
 
 /* Verbose mode ------------------------------------------------------------ */
 
-set_quiet(true);
+set_quiet(false);
 
 /* Now --------------------------------------------------------------------- */
 
@@ -67,6 +67,19 @@ describe('Contracts deployment', async () => {
 });
 
 describe('Set up', async () => {
+  it('Set up whitelist permission should succeed', async () => {
+    await whitelist.update_transfer_list(new Nat(0), Option.Some<[boolean, Nat[]]>([true, [new Nat(0)]]), { as: alice })
+  });
+
+  it('Set sales contract in sales storage should succeed', async () => {
+    await sales_storage.set_sales_contract(sales.get_address(), { as: alice })
+  });
+
+  it('Authorize sales contracts in transfer manager should succeed', async () => {
+    await transfer_manager.authorize_contract(sales.get_address(), { as: alice })
+    await transfer_manager.authorize_contract(sales_storage.get_address(), { as: alice })
+  });
+
   it('Add Alice as whitelister should succeed', async () => {
     await users_storage.add_whitelister(whitelist.get_address(), { as: alice })
     await whitelist.add_whitelister(alice.get_address(), { as: alice })
@@ -89,6 +102,14 @@ describe('Set up', async () => {
     await fa2.update_operators([
         Or.Left<operator_param, operator_param>(new operator_param(alice.get_address(), transfer_manager.get_address(), new Nat(0)))
       ],
+      { as: alice }
+    );
+  });
+});
+
+describe('Sell NFT', async () => {
+  it('Sell NFT as Alice', async () => {
+    await sales.sell(fa2.get_address(), new Nat(0), new Nat(0), new Bytes(""), new sale([], [], new Nat(10000), new Nat(1), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
       { as: alice }
     );
   });

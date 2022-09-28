@@ -366,7 +366,7 @@ const set_sales_storage_arg_to_mich = (sss_contract: ex.Address): ex.Micheline =
 const set_max_bundle_items_arg_to_mich = (smbi_number: ex.Nat): ex.Micheline => {
     return smbi_number.to_mich();
 }
-const sell_arg_to_mich = (s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: asset_type, s_sale_asset: ex.Bytes, s_sale: sale): ex.Micheline => {
+const sell_arg_to_mich = (s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: ex.Nat, s_sale_asset: ex.Bytes, s_sale: sale): ex.Micheline => {
     return ex.pair_to_mich([
         s_asset_contract.to_mich(),
         s_asset_token_id.to_mich(),
@@ -473,7 +473,7 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async sell(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: asset_type, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<any> {
+    async sell(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: ex.Nat, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "sell", sell_arg_to_mich(s_asset_contract, s_asset_token_id, s_sale_type, s_sale_asset, s_sale), params);
         }
@@ -545,7 +545,7 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async get_sell_param(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: asset_type, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
+    async get_sell_param(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: ex.Nat, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "sell", sell_arg_to_mich(s_asset_contract, s_asset_token_id, s_sale_type, s_sale_asset, s_sale), params);
         }
