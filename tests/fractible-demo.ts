@@ -1,5 +1,4 @@
 import { blake2b, Bytes, expect_to_fail, get_account, Key, Nat, Option, Or, pair_to_mich, set_mockup, set_mockup_now, set_quiet, Signature, string_to_mich, Tez } from '@completium/experiment-ts'
-import { fa2, operator_param } from './binding/fa2';
 
 
 const assert = require('assert');
@@ -12,6 +11,7 @@ import { sales_storage } from './binding/sales_storage';
 import { transfer_manager } from './binding/transfer_manager';
 import { users_storage } from './binding/users_storage';
 import { whitelist } from './binding/whitelist';
+import { nft, operator_param } from "./binding/nft";
 
 /* Accounts ----------------------------------------------------------------- */
 
@@ -25,11 +25,11 @@ const user4 = get_account('bootstrap4');
 
 /* Endpoint ---------------------------------------------------------------- */
 
-set_mockup()
+//set_mockup()
 
 /* Verbose mode ------------------------------------------------------------ */
 
-set_quiet(true);
+set_quiet(false);
 
 /* Now --------------------------------------------------------------------- */
 
@@ -63,7 +63,7 @@ describe('Contracts deployment', async () => {
     await sales.deploy(alice.get_address(), new Nat(0), transfer_manager.get_address(), sales_storage.get_address(),  { as: alice })
   });
   it('NFT contract deployment should succeed', async () => {
-    await fa2.deploy(alice.get_address(), whitelist.get_address(), { as: alice })
+    await nft.deploy(alice.get_address(), whitelist.get_address(), { as: alice })
   });
 });
 
@@ -96,11 +96,11 @@ describe('Set up', async () => {
   });
 
   it('Mint NFT', async () => {
-    await fa2.mint(alice.get_address(),new Nat(0), new Nat(3), { as: alice })
+    await nft.mint(alice.get_address(),new Nat(10), [], { as: alice })
   });
 
   it('Update operator NFT', async () => {
-    await fa2.update_operators([
+    await nft.update_operators([
         Or.Left<operator_param, operator_param>(new operator_param(alice.get_address(), transfer_manager.get_address(), new Nat(0)))
       ],
       { as: alice }
@@ -110,7 +110,7 @@ describe('Set up', async () => {
 
 describe('Sell NFT', async () => {
   it('Sell NFT as Alice should succeed', async () => {
-    await sales.sell(fa2.get_address(), new Nat(0), new Nat(0), new Bytes(""), new sale([], [], new Nat(100000), new Nat(10), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
+    await sales.sell(nft.get_address(), new Nat(0), new XTZ(), new Bytes(""), new sale([], [], new Nat(100000), new Nat(10), Option.None(), Option.None(), new Nat(10000), Option.None(), Option.None()),
       { as: alice }
     );
   });
@@ -118,9 +118,9 @@ describe('Sell NFT', async () => {
 
 describe('Buy NFT', async () => {
   it('Buy NFT as User1 should fail', async () => {
-    await sales.buy(fa2.get_address(), new Nat(0), alice.get_address(), new Nat(0), new Bytes(""), new Nat(1), [], [], { as: user1, amount: new Tez(0.1) });
+    await sales.buy(nft.get_address(), new Nat(0), alice.get_address(), new XTZ(), new Bytes(""), new Nat(1), [], [], { as: user1, amount: new Tez(0.1) });
   });
   it('Buy NFT as Bob should succeed', async () => {
-    await sales.buy(fa2.get_address(), new Nat(0), alice.get_address(), new Nat(0), new Bytes(""), new Nat(1), [], [], { as: bob, amount: new Tez(0.1) });
+    await sales.buy(nft.get_address(), new Nat(0), alice.get_address(), new XTZ(), new Bytes(""), new Nat(1), [], [], { as: bob, amount: new Tez(0.1) });
   });
 });

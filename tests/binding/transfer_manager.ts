@@ -10,7 +10,7 @@ export class XTZ extends asset_type {
     constructor() {
         super(asset_type_types.XTZ);
     }
-    to_mich() { return ex.left_to_mich(ex.unit_mich); }
+    to_mich() { return new ex.Nat(0).to_mich(); }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -19,7 +19,7 @@ export class FA12 extends asset_type {
     constructor() {
         super(asset_type_types.FA12);
     }
-    to_mich() { return ex.right_to_mich(ex.left_to_mich(ex.unit_mich)); }
+    to_mich() { return new ex.Nat(1).to_mich(); }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -28,7 +28,7 @@ export class FA2 extends asset_type {
     constructor() {
         super(asset_type_types.FA2);
     }
-    to_mich() { return ex.right_to_mich(ex.right_to_mich(ex.unit_mich)); }
+    to_mich() { return new ex.Nat(2).to_mich(); }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }

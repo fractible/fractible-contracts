@@ -1,4 +1,6 @@
-archetype fa2(owner : address, whitelist: address) with metadata "ipfs://QmQZuCnXe1g2WTvzPZXS15U5gfZu8eEMuPepMpaAyUPsAq"
+archetype nft(owner : address, permits : address) with metadata ""
+
+variable token_id_sequence : nat = 0
 
 /* OWNERSHIP TRANSFER ------------------------------------------------------- */
 
@@ -60,18 +62,10 @@ entry set_metadata(k: string, d : option<bytes>) {
   }
 }
 
-/* WHITELIST ---------------------------------------------------------------- */
-entry set_whitelist(whitelist_contract: address) {
-  called by owner
-  effect {
-    whitelist := whitelist_contract
-  }
-}
-
 /* TOKEN METADATA ------------------------------------------------------------ */
 
 constant TOKEN_ID                 : nat    = 0
-constant METADATA_COIN            : bytes  = 0x697066733a2f2f516d645756794865776b6b316e387562356f594a39647850505234776a446f47747a68523556713246454a6f745a // ipfs://Qmav5uaBCzMw7xqDoU6MDE4t4siXUHNG7fJhGLtoywK5iJ
+constant METADATA_COIN            : bytes  = 0x697066733a2f2f516d617635756142437a4d77377871446f55364d444534743473695855484e4737664a68474c746f79774b35694a // ipfs://Qmav5uaBCzMw7xqDoU6MDE4t4siXUHNG7fJhGLtoywK5iJ
 
 asset token_metadata to big_map {
   ftoken_metadata : nat;
@@ -86,6 +80,16 @@ entry set_token_metadata (tid : nat, tdata: map<string, bytes>) {
   require { tmd_r1: is_not_paused() }
   effect {
     token_metadata.add_update(tid, { token_id = tid; token_info = tdata });
+  }
+}
+
+/* PERMITS ----------------------------------------------------------------- */
+
+entry set_permits(p : address) {
+  called by owner
+  require { p_r1 : is_not_paused() }
+  effect {
+    permits := p
   }
 }
 
@@ -170,6 +174,30 @@ record operator_param {
   opp_token_id : nat
 } as ((owner, (operator, token_id)))
 
+/*enum update_op =
+| add_operator<operator_param>
+| remove_operator<operator_param>
+
+entry update_operators (upl : list<update_op>) {
+  require { r0 : is_not_paused() }
+  effect {
+    for up in upl do
+      match up with
+      | add_operator(param) ->
+        do_require(param.opp_owner = caller , CALLER_NOT_OWNER);
+        operator.put({
+          oaddr  = param.opp_operator;
+          otoken = param.opp_token_id;
+          oowner = param.opp_owner
+        })
+      | remove_operator(param) ->
+        do_require(param.opp_owner = caller , CALLER_NOT_OWNER);
+        operator.remove((param.opp_operator, param.opp_token_id, param.opp_owner))
+      end;
+    done;
+  }
+}*/
+
 entry update_operators (upl : list<or<operator_param, operator_param>>) {
   require { fa2_r1 : is_not_paused() }
   effect {
@@ -204,19 +232,13 @@ entry update_operators_for_all (upl : list<update_for_all_op>) {
   }
 }
 
-entry %transfer (txs : list<transfer_param>) {
-  require { fa2_r4 : is_not_paused() }
+entry do_transfer(txs : list<transfer_param>) {
+  called by self_address
   effect {
-    if not check_operator(txs) then begin
-      fail(FA2_NOT_OPERATOR)
-    end;
-
     for tx in txs do
       const %from = tx.tp_from;
       const tds   = tx.tp_txs;
       for td in tds do begin
-        const is_authorized ?= call_view<string>(whitelist, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
-        do_require(is_authorized = "", is_authorized);
         const tid = td.token_id_dest;
         const amount = ledger[(%from, tid)]?.lamount ? the : 0;
         const new_amount ?=
@@ -232,11 +254,49 @@ entry %transfer (txs : list<transfer_param>) {
   }
 }
 
-entry mint (tow : address, tid : nat, nbt : nat) {
+record gasless_param {
+  transfer_params : list<transfer_param>;
+  user_pk         : key;
+  user_sig        : signature
+}
+
+entry transfer_gasless (batch : list<gasless_param>) {
+  require { fa2_r3 : is_not_paused() }
+  effect {
+    for b in batch do
+      const txs = b.transfer_params;
+      const pk  = b.user_pk;
+      const sig = b.user_sig;
+      transfer 0tz to permits
+        call check<key * signature * bytes>((pk, sig, pack(txs)));
+      transfer 0tz to entry self.do_transfer(txs);
+    done
+  }
+}
+
+entry %transfer (txs : list<transfer_param>) {
+  require { fa2_r4 : is_not_paused() }
+  effect {
+    if not check_operator(txs) then begin
+      match get_from(txs) with
+      | some(%from) ->
+        transfer 0tz to permits
+          call consume<address * bytes * string>((%from, pack(txs), FA2_NOT_OPERATOR))
+      | none -> ()
+      end
+    end;
+
+    transfer 0tz to entry self.do_transfer(txs);
+  }
+}
+
+entry mint (tow : address, nbt : nat, tdata: map<string, bytes>) {
   called by owner
   require { fa2_r5: is_not_paused() }
   effect {
-    ledger.add_update((tow, tid), { lamount += nbt });
+    ledger.add_update((tow, token_id_sequence), { lamount += nbt });
+    token_metadata.add_update(token_id_sequence, { token_id = token_id_sequence; token_info = tdata });
+    token_id_sequence := token_id_sequence + 1;
   }
 }
 
@@ -251,7 +311,10 @@ entry burn(tid : nat, nbt : nat) {
   effect {
     if (amount > nbt) then
       ledger.update((caller, tid), { lamount -= nbt })
-    else ledger.remove((caller, tid))
+    else begin
+      ledger.remove((caller, tid));
+      token_metadata.remove(tid)
+    end
   }
 }
 

@@ -10,7 +10,7 @@ export class XTZ extends asset_type {
     constructor() {
         super(asset_type_types.XTZ);
     }
-    to_mich() { return ex.left_to_mich(ex.unit_mich); }
+    to_mich() { return new ex.Nat(0).to_mich(); }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -19,7 +19,7 @@ export class FA12 extends asset_type {
     constructor() {
         super(asset_type_types.FA12);
     }
-    to_mich() { return ex.right_to_mich(ex.left_to_mich(ex.unit_mich)); }
+    to_mich() { return new ex.Nat(1).to_mich(); }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -28,7 +28,7 @@ export class FA2 extends asset_type {
     constructor() {
         super(asset_type_types.FA2);
     }
-    to_mich() { return ex.right_to_mich(ex.right_to_mich(ex.unit_mich)); }
+    to_mich() { return new ex.Nat(2).to_mich(); }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -366,7 +366,7 @@ const set_sales_storage_arg_to_mich = (sss_contract: ex.Address): ex.Micheline =
 const set_max_bundle_items_arg_to_mich = (smbi_number: ex.Nat): ex.Micheline => {
     return smbi_number.to_mich();
 }
-const sell_arg_to_mich = (s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: ex.Nat, s_sale_asset: ex.Bytes, s_sale: sale): ex.Micheline => {
+const sell_arg_to_mich = (s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: asset_type, s_sale_asset: ex.Bytes, s_sale: sale): ex.Micheline => {
     return ex.pair_to_mich([
         s_asset_contract.to_mich(),
         s_asset_token_id.to_mich(),
@@ -375,7 +375,7 @@ const sell_arg_to_mich = (s_asset_contract: ex.Address, s_asset_token_id: ex.Nat
         s_sale.to_mich()
     ]);
 }
-const buy_arg_to_mich = (b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: ex.Nat, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>): ex.Micheline => {
+const buy_arg_to_mich = (b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: asset_type, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>): ex.Micheline => {
     return ex.pair_to_mich([
         b_asset_contract.to_mich(),
         b_asset_token_id.to_mich(),
@@ -473,13 +473,13 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async sell(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: ex.Nat, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<any> {
+    async sell(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: asset_type, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "sell", sell_arg_to_mich(s_asset_contract, s_asset_token_id, s_sale_type, s_sale_asset, s_sale), params);
         }
         throw new Error("Contract not initialised");
     }
-    async buy(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: ex.Nat, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<any> {
+    async buy(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: asset_type, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "buy", buy_arg_to_mich(b_asset_contract, b_asset_token_id, b_seller, b_sale_type, b_sale_asset, b_amount, b_origin_fees, b_payouts), params);
         }
@@ -545,13 +545,13 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async get_sell_param(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: ex.Nat, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
+    async get_sell_param(s_asset_contract: ex.Address, s_asset_token_id: ex.Nat, s_sale_type: asset_type, s_sale_asset: ex.Bytes, s_sale: sale, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "sell", sell_arg_to_mich(s_asset_contract, s_asset_token_id, s_sale_type, s_sale_asset, s_sale), params);
         }
         throw new Error("Contract not initialised");
     }
-    async get_buy_param(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: ex.Nat, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
+    async get_buy_param(b_asset_contract: ex.Address, b_asset_token_id: ex.Nat, b_seller: ex.Address, b_sale_type: asset_type, b_sale_asset: ex.Bytes, b_amount: ex.Nat, b_origin_fees: Array<part>, b_payouts: Array<part>, params: Partial<ex.Parameters>): Promise<ex.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "buy", buy_arg_to_mich(b_asset_contract, b_asset_token_id, b_seller, b_sale_type, b_sale_asset, b_amount, b_origin_fees, b_payouts), params);
         }
