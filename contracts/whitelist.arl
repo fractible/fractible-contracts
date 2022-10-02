@@ -134,7 +134,7 @@ record transfer_list {
 }
 variable transfer_lists : big_map<nat, transfer_list> = []
 
-function assert_receiver(addr : address) : bool {
+view assert_receiver(addr : address) : bool {
   var res = true;
   const user_id ?= call_view<option<nat>>(users, "get_user_id", addr);
   match user_id with
@@ -154,7 +154,8 @@ function assert_receiver(addr : address) : bool {
 
 entry assert_receivers (addrs : list<address>) {
   for addr in addrs do
-    do_require(assert_receiver(addr), USER_RESTRICTED)
+    const is_authorized ?= call_view<bool>(self_address, "assert_receiver", addr) : "ASSERT_RECEIVER_FAILED";
+    do_require(is_authorized = true, USER_RESTRICTED)
   done
 }
 

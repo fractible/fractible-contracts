@@ -1,4 +1,4 @@
-archetype nft(owner : address, permits : address) with metadata ""
+archetype nft(owner : address, permits : address, whitelist: address) with metadata ""
 
 variable token_id_sequence : nat = 0
 
@@ -113,6 +113,11 @@ record transfer_param {
   tp_from : address;
   tp_txs  : list<transfer_destination>;
 } as ((%from_, %txs))
+
+record mint_param {
+  mint_dest : address;
+  mint_amount  : nat;
+}
 
 /* STORAGE ---------------------------------------------------------------- */
 
@@ -239,6 +244,8 @@ entry do_transfer(txs : list<transfer_param>) {
       const %from = tx.tp_from;
       const tds   = tx.tp_txs;
       for td in tds do begin
+        const is_authorized ?= call_view<string>(whitelist, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
+        do_require(is_authorized = "", is_authorized);
         const tid = td.token_id_dest;
         const amount = ledger[(%from, tid)]?.lamount ? the : 0;
         const new_amount ?=
@@ -290,11 +297,15 @@ entry %transfer (txs : list<transfer_param>) {
   }
 }
 
-entry mint (tow : address, nbt : nat, tdata: map<string, bytes>) {
+entry mint (mints : list<mint_param>, tdata: map<string, bytes>) {
   called by owner
   require { fa2_r5: is_not_paused() }
   effect {
-    ledger.add_update((tow, token_id_sequence), { lamount += nbt });
+    for mint_arg in mints do
+      const is_authorized ?= call_view<bool>(whitelist, "assert_receiver", mint_arg.mint_dest) : "ASSERT_RECEIVER_FAILED";
+      do_require(is_authorized = true, ("UNAUTHORIZED _USER", mint_arg.mint_dest));
+      ledger.add_update((mint_arg.mint_dest, token_id_sequence), { lamount += mint_arg.mint_amount });
+    done;
     token_metadata.add_update(token_id_sequence, { token_id = token_id_sequence; token_info = tdata });
     token_id_sequence := token_id_sequence + 1;
   }

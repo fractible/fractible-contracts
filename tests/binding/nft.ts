@@ -55,6 +55,18 @@ export class transfer_param implements att.ArchetypeType {
         return (this.tp_from.equals(v.tp_from) && this.tp_from.equals(v.tp_from) && JSON.stringify(this.tp_txs) == JSON.stringify(v.tp_txs));
     }
 }
+export class mint_param implements att.ArchetypeType {
+    constructor(public mint_dest: att.Address, public mint_amount: att.Nat) { }
+    toString(): string {
+        return JSON.stringify(this, null, 2);
+    }
+    to_mich(): att.Micheline {
+        return att.pair_to_mich([this.mint_dest.to_mich(), this.mint_amount.to_mich()]);
+    }
+    equals(v: mint_param): boolean {
+        return (this.mint_dest.equals(v.mint_dest) && this.mint_dest.equals(v.mint_dest) && this.mint_amount.equals(v.mint_amount));
+    }
+}
 export class operator_param implements att.ArchetypeType {
     constructor(public opp_owner: att.Address, public opp_operator: att.Address, public opp_token_id: att.Nat) { }
     toString(): string {
@@ -122,6 +134,10 @@ export const transfer_param_mich_type: att.MichelineType = att.pair_array_to_mic
         ], [])
     ], []), ["%txs"])
 ], []);
+export const mint_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
+    att.prim_annot_to_mich_type("address", ["%mint_dest"]),
+    att.prim_annot_to_mich_type("nat", ["%mint_amount"])
+], []);
 export const operator_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
     att.prim_annot_to_mich_type("address", ["%owner"]),
     att.pair_array_to_mich_type([
@@ -175,6 +191,16 @@ export const mich_to_transfer_param = (v: att.Micheline, collapsed: boolean = fa
         fields = att.annotated_mich_to_array(v, transfer_param_mich_type);
     }
     return new transfer_param(att.mich_to_address(fields[0]), att.mich_to_list(fields[1], x => { return mich_to_transfer_destination(x, collapsed); }));
+};
+export const mich_to_mint_param = (v: att.Micheline, collapsed: boolean = false): mint_param => {
+    let fields: att.Micheline[] = [];
+    if (collapsed) {
+        fields = att.mich_to_pairs(v);
+    }
+    else {
+        fields = att.annotated_mich_to_array(v, mint_param_mich_type);
+    }
+    return new mint_param(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]));
 };
 export const mich_to_operator_param = (v: att.Micheline, collapsed: boolean = false): operator_param => {
     let fields: att.Micheline[] = [];
@@ -433,13 +459,14 @@ const transfer_arg_to_mich = (txs: Array<transfer_param>): att.Micheline => {
         return x.to_mich();
     });
 }
-const mint_arg_to_mich = (tow: att.Address, nbt: att.Nat, tdata: Array<[
+const mint_arg_to_mich = (mints: Array<mint_param>, tdata: Array<[
     string,
     att.Bytes
 ]>): att.Micheline => {
     return att.pair_to_mich([
-        tow.to_mich(),
-        nbt.to_mich(),
+        att.list_to_mich(mints, x => {
+            return x.to_mich();
+        }),
         att.list_to_mich(tdata, x => {
             const x_key = x[0];
             const x_value = x[1];
@@ -482,10 +509,11 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(owner: att.Address, permits: att.Address, params: Partial<ex.Parameters>) {
+    async deploy(owner: att.Address, permits: att.Address, whitelist: att.Address, params: Partial<ex.Parameters>) {
         const address = await ex.deploy("./contracts/nft.arl", {
             owner: owner.to_mich(),
-            permits: permits.to_mich()
+            permits: permits.to_mich(),
+            whitelist: whitelist.to_mich()
         }, params);
         this.address = address;
         this.balance_of_callback_address = await deploy_balance_of_callback();
@@ -565,12 +593,12 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
-    async mint(tow: att.Address, nbt: att.Nat, tdata: Array<[
+    async mint(mints: Array<mint_param>, tdata: Array<[
         string,
         att.Bytes
     ]>, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
-            return await ex.call(this.address, "mint", mint_arg_to_mich(tow, nbt, tdata), params);
+            return await ex.call(this.address, "mint", mint_arg_to_mich(mints, tdata), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -655,12 +683,12 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
-    async get_mint_param(tow: att.Address, nbt: att.Nat, tdata: Array<[
+    async get_mint_param(mints: Array<mint_param>, tdata: Array<[
         string,
         att.Bytes
     ]>, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "mint", mint_arg_to_mich(tow, nbt, tdata), params);
+            return await ex.get_call_param(this.address, "mint", mint_arg_to_mich(mints, tdata), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -693,6 +721,13 @@ export class Nft {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
             return new att.Address(storage.permits);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_whitelist(): Promise<att.Address> {
+        if (this.address != undefined) {
+            const storage = await ex.get_storage(this.address);
+            return new att.Address(storage.whitelist);
         }
         throw new Error("Contract not initialised");
     }
@@ -851,10 +886,12 @@ export class Nft {
         fa2_r7: att.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
         fa2_r6: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r6\"")]),
         FA2_INSUFFICIENT_BALANCE: att.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
+        ASSERT_RECEIVER_FAILED: att.string_to_mich("\"ASSERT_RECEIVER_FAILED\""),
         fa2_r5: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r5\"")]),
         INVALID_CALLER: att.string_to_mich("\"INVALID_CALLER\""),
         fa2_r4: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r4\"")]),
         fa2_r3: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r3\"")]),
+        ASSERT_TRANSFER_FAILED: att.string_to_mich("\"ASSERT_TRANSFER_FAILED\""),
         fa2_r2: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r2\"")]),
         CALLER_NOT_OWNER: att.string_to_mich("\"CALLER_NOT_OWNER\""),
         fa2_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r1\"")]),

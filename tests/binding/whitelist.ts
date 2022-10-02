@@ -106,6 +106,9 @@ const update_transfer_list_arg_to_mich = (transfer_list_id: att.Nat, u: att.Opti
 const get_user_arg_to_mich = (user: att.Address): att.Micheline => {
     return user.to_mich();
 }
+const view_assert_receiver_arg_to_mich = (addr: att.Address): att.Micheline => {
+    return addr.to_mich();
+}
 const view_assert_transfer_arg_to_mich = (sender: att.Address, from: att.Address, to: att.Address): att.Micheline => {
     return att.pair_to_mich([
         sender.to_mich(),
@@ -347,6 +350,13 @@ export class Whitelist {
         }
         throw new Error("Contract not initialised");
     }
+    async view_assert_receiver(addr: att.Address, params: Partial<ex.Parameters>): Promise<boolean> {
+        if (this.address != undefined) {
+            const mich = await ex.exec_view(this.get_address(), "assert_receiver", view_assert_receiver_arg_to_mich(addr), params);
+            return mich;
+        }
+        throw new Error("Contract not initialised");
+    }
     async view_assert_transfer(sender: att.Address, from: att.Address, to: att.Address, params: Partial<ex.Parameters>): Promise<string> {
         if (this.address != undefined) {
             const mich = await ex.exec_view(this.get_address(), "assert_transfer", view_assert_transfer_arg_to_mich(sender, from, to), params);
@@ -442,6 +452,7 @@ export class Whitelist {
         FROM_TRANSFERLIST_NOT_FOUND: att.string_to_mich("\"FROM_TRANSFERLIST_NOT_FOUND\""),
         ASSERT_TRANSFER_FAILED: att.string_to_mich("\"ASSERT_TRANSFER_FAILED\""),
         USER_RESTRICTED: att.string_to_mich("\"USER_RESTRICTED\""),
+        ASSERT_RECEIVER_FAILED: att.string_to_mich("\"ASSERT_RECEIVER_FAILED\""),
         CONTRACT_NOT_PAUSED: att.string_to_mich("\"CONTRACT_NOT_PAUSED\""),
         CONTRACT_PAUSED: att.string_to_mich("\"CONTRACT_PAUSED\""),
         co1: att.string_to_mich("\"INVALID_CALLER\""),
