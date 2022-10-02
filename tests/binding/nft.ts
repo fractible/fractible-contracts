@@ -243,6 +243,7 @@ export const mich_to_balance_of_response = (v: att.Micheline, collapsed: boolean
     return new balance_of_response(mich_to_balance_of_request(fields[0], collapsed), att.mich_to_nat(fields[1]));
 };
 export type token_metadata_key = att.Nat;
+export type minter_key = att.Address;
 export class ledger_key implements att.ArchetypeType {
     constructor(public lowner: att.Address, public ltokenid: att.Nat) { }
     toString(): string {
@@ -280,6 +281,7 @@ export class operator_for_all_key implements att.ArchetypeType {
     }
 }
 export const token_metadata_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("nat", []);
+export const minter_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
 export const ledger_key_mich_type: att.MichelineType = att.pair_array_to_mich_type([
     att.prim_annot_to_mich_type("address", ["%lowner"]),
     att.prim_annot_to_mich_type("nat", ["%ltokenid"])
@@ -369,6 +371,7 @@ export type token_metadata_container = Array<[
     token_metadata_key,
     token_metadata_value
 ]>;
+export type minter_container = Array<minter_key>;
 export type ledger_container = Array<[
     ledger_key,
     ledger_value
@@ -385,6 +388,7 @@ export const token_metadata_container_mich_type: att.MichelineType = att.pair_to
     att.prim_annot_to_mich_type("nat", ["%token_id"]),
     att.pair_to_mich_type("map", att.prim_annot_to_mich_type("string", []), att.prim_annot_to_mich_type("bytes", []))
 ], []));
+export const minter_container_mich_type: att.MichelineType = att.list_annot_to_mich_type(att.prim_annot_to_mich_type("address", []), []);
 export const ledger_container_mich_type: att.MichelineType = att.pair_to_mich_type("big_map", att.pair_array_to_mich_type([
     att.prim_annot_to_mich_type("address", ["%lowner"]),
     att.prim_annot_to_mich_type("nat", ["%ltokenid"])
@@ -433,6 +437,12 @@ const set_token_metadata_arg_to_mich = (tid: att.Nat, tdata: Array<[
 }
 const set_permits_arg_to_mich = (p: att.Address): att.Micheline => {
     return p.to_mich();
+}
+const add_minter_arg_to_mich = (new_minter: att.Address): att.Micheline => {
+    return new_minter.to_mich();
+}
+const rm_whitelister_arg_to_mich = (old_minter: att.Address): att.Micheline => {
+    return old_minter.to_mich();
 }
 const update_operators_arg_to_mich = (upl: Array<att.Or<operator_param, operator_param>>): att.Micheline => {
     return att.list_to_mich(upl, x => {
@@ -563,6 +573,18 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
+    async add_minter(new_minter: att.Address, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "add_minter", add_minter_arg_to_mich(new_minter), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async rm_whitelister(old_minter: att.Address, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "rm_whitelister", rm_whitelister_arg_to_mich(old_minter), params);
+        }
+        throw new Error("Contract not initialised");
+    }
     async update_operators(upl: Array<att.Or<operator_param, operator_param>>, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "update_operators", update_operators_arg_to_mich(upl), params);
@@ -650,6 +672,18 @@ export class Nft {
     async get_set_permits_param(p: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "set_permits", set_permits_arg_to_mich(p), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_add_minter_param(new_minter: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "add_minter", add_minter_arg_to_mich(new_minter), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_rm_whitelister_param(old_minter: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "rm_whitelister", rm_whitelister_arg_to_mich(old_minter), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -775,6 +809,17 @@ export class Nft {
             else {
                 return false;
             }
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_minter(): Promise<minter_container> {
+        if (this.address != undefined) {
+            const storage = await ex.get_storage(this.address);
+            const res: Array<att.Address> = [];
+            for (let i = 0; i < storage.minter.length; i++) {
+                res.push((x => { return new att.Address(x); })(storage.minter[i]));
+            }
+            return res;
         }
         throw new Error("Contract not initialised");
     }
