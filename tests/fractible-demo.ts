@@ -1,4 +1,5 @@
-import { blake2b, Bytes, expect_to_fail, get_account, Key, Nat, Option, Or, pair_to_mich, set_mockup, set_mockup_now, set_quiet, Signature, string_to_mich, Tez } from '@completium/experiment-ts'
+import { blake2b, expect_to_fail, get_account, set_mockup, set_mockup_now, set_quiet } from '@completium/experiment-ts'
+import { Bytes, Nat, Option, Or, Tez } from "@completium/archetype-ts-types";
 
 
 const assert = require('assert');
