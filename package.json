@@ -1,6 +1,6 @@
 {
   "name": "@fractible/fractible-contracts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "test": "./run_test.sh",
     "gen-binding": "completium-cli run binder-ts"
