@@ -93,6 +93,28 @@ entry set_permits(p : address) {
   }
 }
 
+//----------------------------------------------------------------------------
+// Minter role
+//----------------------------------------------------------------------------
+
+asset minter {
+  addr : address
+}
+
+entry add_minter(new_minter : address) {
+  called by owner
+  effect {
+    minter.add({ new_minter })
+  }
+}
+
+entry rm_whitelister(old_minter : address) {
+  called by owner
+  effect {
+    minter.remove(old_minter)
+  }
+}
+
 /* ERRORS ----------------------------------------------------------------- */
 
 constant CALLER_NOT_OWNER         : string = "CALLER_NOT_OWNER"
@@ -298,7 +320,7 @@ entry %transfer (txs : list<transfer_param>) {
 }
 
 entry mint (mints : list<mint_param>, tdata: map<string, bytes>) {
-  called by owner
+  called by owner or minter
   require { fa2_r5: is_not_paused() }
   effect {
     for mint_arg in mints do
