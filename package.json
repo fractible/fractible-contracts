@@ -1,5 +1,5 @@
 {
-  "name": "fractible-demo",
+  "name": "@fractible/fractible-contracts",
   "version": "1.0.0",
   "scripts": {
     "test": "./run_test.sh",
