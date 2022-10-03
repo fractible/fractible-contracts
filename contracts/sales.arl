@@ -103,141 +103,68 @@ entry set_max_bundle_items(smbi_number : nat) {
 //----------------------------------------------------------------------------
 // Types
 //----------------------------------------------------------------------------
-enum asset_type =
-| XTZ
-| FA12
-| FA2
-
-record FA2_asset {
-  fa2_asset_contract : address;
-  fa2_asset_token_id: nat;
-}
-
-record FA12_asset {
-  fa12_asset_contract : address;
-}
-
 record transfer_param {
   destination_address: address;
   token_id: nat;
   token_amount: nat
 } as ((%to, (token_id, amount)))
 
-record process_transfer_param {
-  ptp_asset_type: asset_type;
-  ptp_asset: bytes;
-  ptp_amount: nat;
-  ptp_origin: address;
-  ptp_destination: address;
-}
-
-record part {
-  part_account : address;
-  part_value   : nat;
-}
-
-record fees {
-  origin_fees : list<part>;
-  payouts: list<part>;
-}
-
-record bundle_item {
-  bundle_item_contract : address;
-  bundle_item_id   : nat;
-  bundle_item_qty: nat;
-}
-
-record bundle_sale {
-  bundle_sale_origin_fees : list<part>;
-  bundle_sale_payouts : list<part>;
-  bundle_sale_amount : nat;
-  bundle_sale_start: option<date>;
-  bundle_sale_end: option<date>;
-  bundle_sale_qty: nat;
-  bundle_sale_max_fees_base_boint: nat;
-  bundle_sale_data_type  : option<bytes>;
-  bundle_sale_data       : option<bytes>;
-}
-
 record sale {
-  sale_origin_fees : list<part>;
-  sale_payouts : list<part>;
-  sale_amount : nat;
-  sale_asset_qty: nat;
+  sale_contract: address;
+  sale_token_id: nat;
+  sale_seller: address;
+  sale_price_per_item: nat;
+  sale_qty: nat;
   sale_start: option<date>;
   sale_end: option<date>;
-  sale_max_fees_base_boint: nat;
-  sale_data_type  : option<bytes>;
-  sale_data       : option<bytes>;
+  sale_version: nat;
+  sale_data_type  : bytes;
+  sale_data       : bytes;
 }
 
 entry sell (
-  s_asset_contract: address,
-  s_asset_token_id: nat,
-  s_sale_type: asset_type,
-  s_sale_asset: bytes,
   s_sale : sale) {
+    constant {
+      start_date is s_sale.sale_start ? the: now;
+    }
     require {
-        r_s0: s_sale.sale_amount > 0;
-        r_s1: s_sale.sale_asset_qty > 0;
-        r_s2: s_sale.sale_max_fees_base_boint > 0
-                and s_sale.sale_max_fees_base_boint <= max_fees_limit
-                and s_sale.sale_max_fees_base_boint > protocol_fee
-                and process_sum_fees(s_sale.sale_origin_fees) + protocol_fee <= s_sale.sale_max_fees_base_boint;
-        r_s3: s_sale_type = FA2
-            or
-            s_sale_type = FA12
-            or
-            s_sale_type = XTZ;
+      sell_invalid_price: s_sale.sale_price_per_item > 0;
+      sell_invalid_qty: s_sale.sale_qty > 0;
     }
     effect {
-
       match s_sale.sale_end with
       | some(end_date) -> begin
-        do_require(end_date > now, INVALID_SALE_END_DATE);
-        const start_date = s_sale.sale_start ? the: now;
-        do_require(end_date > start_date, INVALID_SALE_START_DATE);
+        do_require(end_date > now, "SALE_END_IN_THE_PAST");
+        do_require(end_date > start_date, "SALE_END_BEFORE_START");
       end
       | none -> ()
       end;
-
-      var unpack_result = verify_and_unpack_asset(s_sale_type, s_sale_asset);
-      transfer 0tz to sales_storage call set_sale<address * nat * address * asset_type * bytes * sale>(
-        (
-          s_asset_contract,
-          s_asset_token_id,
-          caller,
-          s_sale_type,
-          s_sale_asset,
-          s_sale
-        )
-      );
+      transfer 0tz to sales_storage call set_sale<sale>(s_sale);
     }
 }
 
 
 entry buy(
-  b_asset_contract: address,
-  b_asset_token_id: nat,
-  b_seller: address,
-  b_sale_type: asset_type,
-  b_sale_asset: bytes,
-  b_amount: nat,
-  b_origin_fees: list<part>,
-  b_payouts: list<part>){
+  b_sale_id: nat,
+  b_qty: nat){
+    constant {
+      stored_sale ?is get_sale(b_sale_id) otherwise "MISSING_SALE";
+      stored_sale_stock is stored_sale.sale_qty;
+      stored_sale_start is stored_sale.sale_start;
+      stored_sale_end is stored_sale.sale_end;
+    }
+    require {
+      buy_incorrect_qty: b_qty > 0 and b_qty >= stored_sale_stock
+    }
     effect {
-      var current_sale ?= get_sale(b_asset_contract, b_asset_token_id, b_seller, b_sale_type, b_sale_asset) : MISSING_SALE;
-      do_require(process_sum_fees(current_sale.sale_origin_fees) + process_sum_fees(b_origin_fees) + protocol_fee <= current_sale.sale_max_fees_base_boint, FEES_OVER_SELLER_LIMIT);
-      do_require(b_amount > 0 and b_amount <= current_sale.sale_asset_qty, INVALID_BUY_AMOUNT);
-
-      match current_sale.sale_end with
+      match stored_sale_end with
       | some(end_date) -> begin
         do_require(end_date > now, SALE_CLOSED);
       end
       | none -> ()
       end;
 
-      match current_sale.sale_start with
+      match stored_sale_start with
       | some(sale_start) -> begin
         do_require(sale_start < now, SALE_NOT_STARTED);
       end
@@ -245,46 +172,14 @@ entry buy(
       end;
 
 
-      var unpack_result = verify_and_unpack_asset(b_sale_type, b_sale_asset);
-      var buy_asset_contract = unpack_result[0];
-      var buy_asset_token_id = unpack_result[1];
-
-      if(b_sale_type = XTZ) then (
-        do_require(transferred = current_sale.sale_amount * b_amount * 1utz, (AMOUNT_MISMATCH, transferred, current_sale.sale_amount * 1utz))
-      );
-
-      transfer transferred to transfer_manager call manage_transfers<list<bundle_item> * address * address * nat * asset_type * bytes * address * address * address * nat * list<part> * list<part>>(
-        (
-          [{
-            bundle_item_contract = b_asset_contract;
-            bundle_item_id = b_asset_token_id ;
-            bundle_item_qty = b_amount
-          }],
-          b_seller,
-          caller,
-          current_sale.sale_amount * b_amount,
-          b_sale_type,
-          b_sale_asset,
-          caller,
-          b_seller,
-          sales_storage,
-          protocol_fee,
-          current_sale.sale_origin_fees.concat(b_origin_fees),
-          current_sale.sale_payouts.concat(b_payouts)
-        )
-      );
-      if(b_amount = current_sale.sale_asset_qty) then (
-        transfer 0tz to sales_storage call remove_sale<address * nat * address * asset_type * bytes>((b_asset_contract, b_asset_token_id, b_seller, b_sale_type, b_sale_asset))
+      if(b_qty = stored_sale_stock) then (
+        transfer 0tz to sales_storage call remove_sale<nat>(b_sale_id)
       ) else (
-        current_sale.sale_asset_qty := abs(current_sale.sale_asset_qty - b_amount);
-        transfer 0tz to sales_storage call set_sale<address * nat * address * asset_type * bytes * sale>(
+        stored_sale.sale_qty := abs(stored_sale.sale_qty - b_qty);
+        transfer 0tz to sales_storage call update_sale<nat * sale>(
           (
-            b_asset_contract,
-            b_asset_token_id,
-            b_seller,
-            b_sale_type,
-            b_sale_asset,
-            current_sale
+            b_sale_id,
+            stored_sale
           )
         );
       )
@@ -293,35 +188,20 @@ entry buy(
 
 
 
-entry cancel_sale(
-  cs_asset_contract: address,
-  cs_asset_token_id: nat,
-  cs_sale_type: asset_type,
-  cs_sale_asset: bytes){
+entry cancel_sale(cs_sale_id: nat){
     require {
-        r_cs0: sale_exists(cs_asset_contract, cs_asset_token_id, caller, cs_sale_type, cs_sale_asset) = true;
+        r_cs0: sale_exists(cs_sale_id) = true;
     }
     effect {
-      transfer 0tz to sales_storage call remove_sale<address * nat * address * asset_type * bytes>((cs_asset_contract, cs_asset_token_id, caller, cs_sale_type, cs_sale_asset))
+      transfer 0tz to sales_storage call remove_sale<nat>(cs_sale_id)
     }
 }
 
-function sale_exists(
-  se_asset_contract: address,
-  se_asset_token_id: nat,
-  se_seller: address,
-  se_sale_type: asset_type,
-  se_sale_asset: bytes) : bool {
+function sale_exists(se_sale_id: nat) : bool {
     return match call_view<bool>(
         sales_storage,
         "sale_exists",
-        (
-            se_asset_contract,
-            se_asset_token_id,
-            se_seller,
-            se_sale_type,
-            se_sale_asset
-        )
+        se_sale_id
     )
     with
         | some(v) -> v
@@ -330,66 +210,12 @@ function sale_exists(
 }
 
 
-function verify_and_unpack_asset(ua_asset_type: asset_type, ua_asset_data: bytes) : (option<address> * option<nat>) {
-    var buy_asset_contract: option<address> = none;
-    var buy_asset_token_id: option<nat> = none;
-    match ua_asset_type with
-      | FA2 -> (
-        match unpack<FA2_asset>(ua_asset_data) with
-        | some(buyAsset) -> (
-            buy_asset_contract := some(buyAsset.fa2_asset_contract);
-            buy_asset_token_id := some(buyAsset.fa2_asset_token_id);
-          )
-        | none -> fail(CANT_UNPACK_FA2_ASSET)
-        end
-      )
-      | FA12 -> (
-        match unpack<FA12_asset>(ua_asset_data) with
-        | some(buyAsset) -> (
-            buy_asset_contract := some(buyAsset.fa12_asset_contract);
-        )
-        | none -> fail(CANT_UNPACK_FA12_ASSET)
-        end
-      )
-      | XTZ -> (
-          if(ua_asset_data <> 0x) then (
-            fail(WRONG_XTZ_PAYLOAD)
-          )
-      )
-      end;
-      return ((buy_asset_contract, buy_asset_token_id))
-}
-
-function get_sale(
-  gb_asset_contract: address,
-  gb_asset_token_id: nat,
-  gb_seller: address,
-  gb_sale_type: asset_type,
-  gb_sale_asset: bytes) : option<sale> {
+function get_sale(gs_sale_id: nat) : option<sale> {
     return (call_view<option<sale>>(
         sales_storage,
         "get_sale",
-        (
-          gb_asset_contract,
-          gb_asset_token_id,
-          gb_seller,
-          gb_sale_type,
-          gb_sale_asset
-        )
+        gs_sale_id
     ) ? the : none<sale>)
 }
-
-function bp(bp_value : nat, bp_op_value : nat) : nat {
-  return abs(floor(bp_value * bp_op_value / 10000))
-}
-
-function process_sum_fees(psf_fees: list<part>): nat {
-  var total = 0;
-  for fee in psf_fees do
-    total := total + fee.part_value;
-  done;
-  return total
-}
-
 
 entry default() {}

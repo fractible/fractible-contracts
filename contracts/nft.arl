@@ -108,7 +108,7 @@ entry add_minter(new_minter : address) {
   }
 }
 
-entry rm_whitelister(old_minter : address) {
+entry rm_minter(old_minter : address) {
   called by owner
   effect {
     minter.remove(old_minter)
@@ -201,30 +201,6 @@ record operator_param {
   opp_token_id : nat
 } as ((owner, (operator, token_id)))
 
-/*enum update_op =
-| add_operator<operator_param>
-| remove_operator<operator_param>
-
-entry update_operators (upl : list<update_op>) {
-  require { r0 : is_not_paused() }
-  effect {
-    for up in upl do
-      match up with
-      | add_operator(param) ->
-        do_require(param.opp_owner = caller , CALLER_NOT_OWNER);
-        operator.put({
-          oaddr  = param.opp_operator;
-          otoken = param.opp_token_id;
-          oowner = param.opp_owner
-        })
-      | remove_operator(param) ->
-        do_require(param.opp_owner = caller , CALLER_NOT_OWNER);
-        operator.remove((param.opp_operator, param.opp_token_id, param.opp_owner))
-      end;
-    done;
-  }
-}*/
-
 entry update_operators (upl : list<or<operator_param, operator_param>>) {
   require { fa2_r1 : is_not_paused() }
   effect {
@@ -259,9 +235,57 @@ entry update_operators_for_all (upl : list<update_for_all_op>) {
   }
 }
 
-entry do_transfer(txs : list<transfer_param>) {
-  called by self_address
+
+record gasless_param {
+  transfer_params : list<transfer_param>;
+  user_pk         : key;
+  user_sig        : signature
+}
+
+entry transfer_gasless (batch : list<gasless_param>) {
+  require { fa2_r3 : is_not_paused() }
   effect {
+    for b in batch do
+      const txs = b.transfer_params;
+      const pk  = b.user_pk;
+      const sig = b.user_sig;
+      transfer 0tz to permits
+        call check<key * signature * bytes>((pk, sig, pack(txs)));
+      for tx in txs do
+        const %from = tx.tp_from;
+        const tds   = tx.tp_txs;
+        for td in tds do begin
+          const is_authorized ?= call_view<string>(whitelist, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
+          do_require(is_authorized = "", is_authorized);
+          const tid = td.token_id_dest;
+          const amount = ledger[(%from, tid)]?.lamount ? the : 0;
+          const new_amount ?=
+              int_to_nat(amount - td.token_amount_dest) : FA2_INSUFFICIENT_BALANCE;
+          if new_amount = 0 then
+            ledger.remove((%from, tid))
+          else begin
+            ledger.update((%from, tid), { lamount := new_amount });
+          end;
+          ledger.add_update((td.to_dest, tid), { lamount += td.token_amount_dest })
+        end
+        done
+      done
+    done
+  }
+}
+
+entry %transfer (txs : list<transfer_param>) {
+  require { fa2_r4 : is_not_paused() }
+  effect {
+    if not check_operator(txs) then begin
+      match get_from(txs) with
+      | some(%from) ->
+        transfer 0tz to permits
+          call consume<address * bytes * string>((%from, pack(txs), FA2_NOT_OPERATOR))
+      | none -> ()
+      end
+    end;
+
     for tx in txs do
       const %from = tx.tp_from;
       const tds   = tx.tp_txs;
@@ -280,42 +304,6 @@ entry do_transfer(txs : list<transfer_param>) {
         ledger.add_update((td.to_dest, tid), { lamount += td.token_amount_dest })
       end done
     done
-  }
-}
-
-record gasless_param {
-  transfer_params : list<transfer_param>;
-  user_pk         : key;
-  user_sig        : signature
-}
-
-entry transfer_gasless (batch : list<gasless_param>) {
-  require { fa2_r3 : is_not_paused() }
-  effect {
-    for b in batch do
-      const txs = b.transfer_params;
-      const pk  = b.user_pk;
-      const sig = b.user_sig;
-      transfer 0tz to permits
-        call check<key * signature * bytes>((pk, sig, pack(txs)));
-      transfer 0tz to entry self.do_transfer(txs);
-    done
-  }
-}
-
-entry %transfer (txs : list<transfer_param>) {
-  require { fa2_r4 : is_not_paused() }
-  effect {
-    if not check_operator(txs) then begin
-      match get_from(txs) with
-      | some(%from) ->
-        transfer 0tz to permits
-          call consume<address * bytes * string>((%from, pack(txs), FA2_NOT_OPERATOR))
-      | none -> ()
-      end
-    end;
-
-    transfer 0tz to entry self.do_transfer(txs);
   }
 }
 
@@ -372,4 +360,8 @@ getter balance_of (requests : list<balance_of_request>) : list<balance_of_respon
       request = br;
       balance_ = b
     })
+}
+
+view get_balance (gb_request : balance_of_request) : option<nat> {
+  return ledger[(gb_request.bo_owner, gb_request.btoken_id)]?.lamount
 }
