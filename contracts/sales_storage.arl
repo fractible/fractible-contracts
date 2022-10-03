@@ -124,7 +124,6 @@ entry update_sale(
   }
 }
 
-
 entry remove_sale(
   rs_sale_id: nat) {
   require {
@@ -139,7 +138,6 @@ view sale_exists(
   se_sale_id: nat) : bool {
   return sales.contains(se_sale_id)
 }
-
 
 view get_sale(
   gs_sale_id: nat) : option<sale> {
