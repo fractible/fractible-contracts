@@ -124,6 +124,7 @@ describe("Set up", async () => {
 				await whitelist.get_add_super_user_param(alice.get_address(), {as: alice}),
 				await sales.get_manage_authorization_param(new add_sales(alice.get_address()), {as: alice}),
 				await sales_storage.get_manage_authorization_param(new add_sales_storage(sales.get_address()), {as: alice}),
+				await sales_storage.get_manage_authorization_param(new add_sales_storage(nft.get_address()), {as: alice}),
 				await whitelist.get_update_users_param([
 					[alice.get_address(), Option.Some<Nat>(new Nat(0))],
 					[bob.get_address(), Option.Some<Nat>(new Nat(0))],
