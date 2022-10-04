@@ -34,26 +34,24 @@ entry claim_ownership() {
 //----------------------------------------------------------------------------
 // Admin
 //----------------------------------------------------------------------------
-variable authorized_contracts   : set<address> = []
 
-entry authorize_contract(ac_contract : address) {
-  called by owner
-  effect {
-    authorized_contracts.add(ac_contract)
-  }
+/* Authorized ------------------------------------------------------------ */
+asset authorised {
+  authorization : address
 }
 
-entry revoke_contract(ac_contract : address) {
+enum authorization_op =
+| add<address>
+| remove<address>
+
+entry manage_authorization(op : authorization_op) {
   called by owner
   effect {
-    authorized_contracts.remove(ac_contract)
+    match op with
+    | add(a)    -> authorised.add({ a })
+    | remove(a) -> authorised.remove(a)
+    end
   }
-}
-
-function is_authorized() : bool {
-  if (authorized_contracts.contains(caller) or caller = self_address)
-  then return true
-  else fail("NOT_AUTHORIZED")
 }
 
 //----------------------------------------------------------------------------
@@ -80,6 +78,7 @@ asset sales identified by sale_id {
 
 entry set_sale(
   ss_sale: sale) {
+  called by authorised
   constant{
     ss_same_sales is sales.select(
       sale_record.sale_contract = ss_sale.sale_contract
@@ -87,7 +86,6 @@ entry set_sale(
       and sale_record.sale_seller = ss_sale.sale_seller);
   }
   require {
-    r_set_sale_authorized: is_authorized();
     r_sale_exists: ss_same_sales.count() = 0;
   }
   effect {
@@ -104,6 +102,7 @@ entry set_sale(
 entry update_sale(
   us_sale_id: nat,
   us_sale: sale) {
+  called by authorised
   constant{
     update_sale_same_sales is sales.select(
       sale_record.sale_contract = us_sale.sale_contract
@@ -111,7 +110,6 @@ entry update_sale(
       and sale_record.sale_seller = us_sale.sale_seller);
   }
   require {
-    update_sale_authorized: is_authorized();
     update_sale_exists: update_sale_same_sales.count() > 0;
   }
   effect {
@@ -126,11 +124,44 @@ entry update_sale(
 
 entry remove_sale(
   rs_sale_id: nat) {
-  require {
-    r_remove_sale_authorized: is_authorized()
-  }
+  called by authorised
   effect {
     sales.remove(rs_sale_id);
+  }
+}
+
+entry remove_sales(
+  rcs_sale_ids: list<nat>) {
+  called by authorised
+  constant{
+    selected_sales is sales.select(rcs_sale_ids.contains(the.sale_id));
+  }
+  effect {
+    for selected_sale_id in selected_sales do
+      do_require(sales[selected_sale_id].sale_record.sale_contract = caller, "INVALID_CALLER");
+      sales.remove(selected_sale_id)
+    done
+  }
+}
+
+entry cancel_matching_orders(
+  cmo_contract: address,
+  cmo_token_id: nat,
+  cmo_owner: address,
+  ) {
+  called by authorised
+  constant{
+    matching_orders is sales.select(
+      sale_record.sale_contract = cmo_contract
+      and sale_record.sale_token_id = cmo_token_id
+      and sale_record.sale_seller = cmo_owner
+    );
+  }
+  effect {
+    for matching_sale_id in matching_orders do
+      do_require(sales[matching_sale_id].sale_record.sale_contract = caller, "INVALID_CALLER");
+      sales.remove(matching_sale_id)
+    done
   }
 }
 

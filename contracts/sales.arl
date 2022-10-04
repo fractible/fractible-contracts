@@ -1,8 +1,7 @@
 archetype sales(
     owner: address,
-    protocol_fee: nat,
-    transfer_manager: address,
-    sales_storage: address
+    sales_storage: address,
+    permits: address
 )
 with metadata ""
 
@@ -31,8 +30,6 @@ constant WRONG_XTZ_PAYLOAD       : string = "WRONG_XTZ_PAYLOAD"
 //----------------------------------------------------------------------------
 
 variable owner_candidate : option<address> = none
-variable max_bundle_items : nat = 10
-variable max_fees_limit : nat = 10000
 
 entry declare_ownership(candidate : address) {
   called by owner
@@ -65,38 +62,29 @@ entry set_sales_storage_contract(sesc_contract : address) {
   }
 }
 
-entry set_protocol_fee(spf : nat) {
+entry set_permits(sp_contract : address) {
   called by owner
   effect {
-    protocol_fee := spf;
+    permits := sp_contract;
   }
 }
 
-entry set_fees_limit(sfl : nat) {
-  called by owner
-  effect {
-    max_fees_limit := sfl;
-  }
+/* Authorized ------------------------------------------------------------ */
+asset authorizations {
+  authorization : address
 }
 
-entry set_transfer_manager(stm_contract : address) {
-  called by owner
-  effect {
-    transfer_manager := stm_contract;
-  }
-}
+enum authorization_op =
+| add<address>
+| remove<address>
 
-entry set_sales_storage(sss_contract : address) {
+entry manage_authorization(op : authorization_op) {
   called by owner
   effect {
-    sales_storage := sss_contract;
-  }
-}
-
-entry set_max_bundle_items(smbi_number : nat) {
-  called by owner
-  effect {
-    max_bundle_items := smbi_number;
+    match op with
+    | add(a)    -> authorizations.add({ a })
+    | remove(a) -> authorizations.remove(a)
+    end
   }
 }
 
@@ -108,6 +96,16 @@ record transfer_param {
   token_id: nat;
   token_amount: nat
 } as ((%to, (token_id, amount)))
+
+record buy_param {
+  buy_sale_id: nat;
+  buy_qty: nat;
+}
+
+record balance_of_request {
+  bor_owner : address;
+  bor_token_id : nat;
+} as ((owner, token_id))
 
 record sale {
   sale_contract: address;
@@ -123,15 +121,23 @@ record sale {
 }
 
 entry sell (
-  s_sale : sale) {
+  s_sale : sale,
+  s_seller_pubk: key,
+  s_sig: signature) {
     constant {
       start_date is s_sale.sale_start ? the: now;
+      seller_address is key_to_address(s_seller_pubk);
+      user_balance ?is get_balance_for_token(s_sale.sale_contract, {bor_owner = s_sale.sale_seller; bor_token_id = s_sale.sale_token_id }) otherwise "INSUFFICIENT_BALANCE"
     }
     require {
       sell_invalid_price: s_sale.sale_price_per_item > 0;
       sell_invalid_qty: s_sale.sale_qty > 0;
+      inconsistent_seller: seller_address = s_sale.sale_seller;
+      insufficient_balance: user_balance > s_sale.sale_qty;
     }
     effect {
+      var packed_data = pack(s_sale);
+      transfer 0tz to permits call check<key * signature * bytes>((s_seller_pubk, s_sig, packed_data));
       match s_sale.sale_end with
       | some(end_date) -> begin
         do_require(end_date > now, "SALE_END_IN_THE_PAST");
@@ -145,18 +151,22 @@ entry sell (
 
 
 entry buy(
-  b_sale_id: nat,
-  b_qty: nat){
+  b_param: buy_param,
+  b_buyer_pubk: key,
+  b_sig: signature){
     constant {
-      stored_sale ?is get_sale(b_sale_id) otherwise "MISSING_SALE";
+      stored_sale ?is get_sale(b_param.buy_sale_id) otherwise "MISSING_SALE";
       stored_sale_stock is stored_sale.sale_qty;
       stored_sale_start is stored_sale.sale_start;
       stored_sale_end is stored_sale.sale_end;
+      buyer_address is key_to_address(b_buyer_pubk);
     }
     require {
-      buy_incorrect_qty: b_qty > 0 and b_qty >= stored_sale_stock
+      buy_incorrect_qty: b_param.buy_qty > 0 and b_param.buy_qty >= stored_sale_stock;
     }
     effect {
+      var packed_data = pack((b_param.buy_sale_id, b_param.buy_qty));
+      transfer 0tz to permits call check<key * signature * bytes>((b_buyer_pubk, b_sig, packed_data));
       match stored_sale_end with
       | some(end_date) -> begin
         do_require(end_date > now, SALE_CLOSED);
@@ -171,14 +181,28 @@ entry buy(
       | none -> ()
       end;
 
+      transfer 0tz to stored_sale.sale_contract call %transfer<list<address * list<transfer_param>>>(
+        [
+            (
+                stored_sale.sale_seller,
+                [
+                    {
+                        destination_address = buyer_address;
+                        token_id = stored_sale.sale_token_id;
+                        token_amount = stored_sale.sale_qty
+                    }
+                ]
+            )
+        ]
+      );
 
-      if(b_qty = stored_sale_stock) then (
-        transfer 0tz to sales_storage call remove_sale<nat>(b_sale_id)
+      if(b_param.buy_qty = stored_sale_stock) then (
+        transfer 0tz to sales_storage call remove_sale<nat>(b_param.buy_sale_id)
       ) else (
-        stored_sale.sale_qty := abs(stored_sale.sale_qty - b_qty);
+        stored_sale.sale_qty := abs(stored_sale.sale_qty - b_param.buy_qty);
         transfer 0tz to sales_storage call update_sale<nat * sale>(
           (
-            b_sale_id,
+            b_param.buy_sale_id,
             stored_sale
           )
         );
@@ -188,11 +212,20 @@ entry buy(
 
 
 
-entry cancel_sale(cs_sale_id: nat){
+entry cancel_sale(
+  cs_sale_id: nat,
+  cs_seller_pubk: key,
+  cs_sig: signature){
+    constant {
+      stored_sale ?is get_sale(cs_sale_id) otherwise "MISSING_SALE";
+      seller_address is key_to_address(cs_seller_pubk);
+    }
     require {
-        r_cs0: sale_exists(cs_sale_id) = true;
+      invalid_caller: stored_sale.sale_seller = seller_address
     }
     effect {
+      var packed_data = pack(cs_sale_id);
+      transfer 0tz to permits call check<key * signature * bytes>((cs_seller_pubk, cs_sig, packed_data));
       transfer 0tz to sales_storage call remove_sale<nat>(cs_sale_id)
     }
 }
@@ -216,6 +249,14 @@ function get_sale(gs_sale_id: nat) : option<sale> {
         "get_sale",
         gs_sale_id
     ) ? the : none<sale>)
+}
+
+function get_balance_for_token(gbft_contract: address, gbft_request: balance_of_request) : option<nat> {
+    return (call_view<option<nat>>(
+        gbft_contract,
+        "get_balance",
+        gbft_request
+    ) ? the : none<nat>)
 }
 
 entry default() {}

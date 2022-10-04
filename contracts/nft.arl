@@ -1,4 +1,4 @@
-archetype nft(owner : address, permits : address, whitelist: address) with metadata ""
+archetype nft(owner : address, permits : address, whitelist: address, marketplace: address, marketplace_storage: address) with metadata ""
 
 variable token_id_sequence : nat = 0
 
@@ -52,44 +52,57 @@ entry unpause() {
   }
 }
 
+/* Marketplace ---------------------------------------------------------------- */
+
+entry set_marketplace(sm_marketplace : address) {
+  called by owner
+  require { p_r1 : is_not_paused() }
+  effect {
+    marketplace := sm_marketplace
+  }
+}
+
+entry set_marketplace_storage(sms_marketplace : address) {
+  called by owner
+  require { sm_r1 : is_not_paused() }
+  effect {
+    marketplace_storage := sms_marketplace
+  }
+}
+
 /* METADATA ---------------------------------------------------------------- */
 
-entry set_metadata(k: string, d : option<bytes>) {
+entry set_metadata(sm_meta_key: string, sm_meta_value : option<bytes>) {
   called by owner
   require { md_r1 : is_not_paused() }
   effect {
-    metadata.update(k, d)
+    metadata.update(sm_meta_key, sm_meta_value)
   }
 }
 
 /* TOKEN METADATA ------------------------------------------------------------ */
 
-constant TOKEN_ID                 : nat    = 0
-constant METADATA_COIN            : bytes  = 0x697066733a2f2f516d617635756142437a4d77377871446f55364d444534743473695855484e4737664a68474c746f79774b35694a // ipfs://Qmav5uaBCzMw7xqDoU6MDE4t4siXUHNG7fJhGLtoywK5iJ
-
 asset token_metadata to big_map {
-  ftoken_metadata : nat;
+  token_metadata_id : nat;
   token_id        : nat;
   token_info      : map<string, bytes>;
-} initialized by {
-  {TOKEN_ID; TOKEN_ID; [("", METADATA_COIN)]}
 }
 
-entry set_token_metadata (tid : nat, tdata: map<string, bytes>) {
+entry set_token_metadata (stm_token_id : nat, stm_token_metadata: map<string, bytes>) {
   called by owner
   require { tmd_r1: is_not_paused() }
   effect {
-    token_metadata.add_update(tid, { token_id = tid; token_info = tdata });
+    token_metadata.add_update(stm_token_id, { token_id = stm_token_id; token_info = stm_token_metadata });
   }
 }
 
 /* PERMITS ----------------------------------------------------------------- */
 
-entry set_permits(p : address) {
+entry set_permits(sp_permit : address) {
   called by owner
-  require { p_r1 : is_not_paused() }
+  require { sp_r1 : is_not_paused() }
   effect {
-    permits := p
+    permits := sp_permit
   }
 }
 
@@ -101,17 +114,17 @@ asset minter {
   addr : address
 }
 
-entry add_minter(new_minter : address) {
+entry add_minter(am_minter : address) {
   called by owner
   effect {
-    minter.add({ new_minter })
+    minter.add({ am_minter })
   }
 }
 
-entry rm_minter(old_minter : address) {
+entry rm_minter(rm_minter : address) {
   called by owner
   effect {
-    minter.remove(old_minter)
+    minter.remove(rm_minter)
   }
 }
 
@@ -143,27 +156,27 @@ record mint_param {
 
 /* STORAGE ---------------------------------------------------------------- */
 
-asset ledger identified by lowner ltokenid to big_map {
-  lowner     : address;
-  ltokenid   : nat;
-  lamount    : nat = 0;
+asset ledger identified by ledger_token_owner ledger_token_id to big_map {
+  ledger_token_owner     : address;
+  ledger_token_id   : nat;
+  ledger_token_amount    : nat = 0;
 }
 
-asset operator identified by oaddr otoken oowner to big_map {
-  oaddr       : address;
-  otoken      : nat;
-  oowner      : address;
+asset operator identified by operator_addr operator_token_id operator_token_onwer to big_map {
+  operator_addr       : address;
+  operator_token_id      : nat;
+  operator_token_onwer      : address;
 }
 
-asset operator_for_all identified by fa_oaddr fa_oowner to big_map {
-  fa_oaddr    : address;
-  fa_oowner   : address;
+asset operator_for_all identified by operator_fa_addr operator_fa_token_onwer to big_map {
+  operator_fa_addr    : address;
+  operator_fa_token_onwer   : address;
 }
 
 /* FUNCTIONS --------------------------------------------------------------- */
 
-function get_from(txs : list<transfer_param>) : option<address> {
-  match txs with
+function get_from(gf_txs : list<transfer_param>) : option<address> {
+  match gf_txs with
   | hd::tl -> begin
     const %from = hd.tp_from;
     for tx in tl do
@@ -175,9 +188,9 @@ function get_from(txs : list<transfer_param>) : option<address> {
   end
 }
 
-function check_operator(txs : list<transfer_param>) : bool {
+function check_operator(co_txs : list<transfer_param>) : bool {
   var res = true;
-  for tx in txs do
+  for tx in co_txs do
     const %from = tx.tp_from;
     const tds = tx.tp_txs;
     for td in tds do begin
@@ -201,10 +214,10 @@ record operator_param {
   opp_token_id : nat
 } as ((owner, (operator, token_id)))
 
-entry update_operators (upl : list<or<operator_param, operator_param>>) {
+entry update_operators (uo_operators : list<or<operator_param, operator_param>>) {
   require { fa2_r1 : is_not_paused() }
   effect {
-    for up in upl do
+    for up in uo_operators do
       match up with
       | left(param) -> (* add *)
         do_require(param.opp_owner = caller , CALLER_NOT_OWNER);
@@ -218,20 +231,39 @@ entry update_operators (upl : list<or<operator_param, operator_param>>) {
 }
 
 enum update_for_all_op =
-| add_for_all<address>
-| remove_for_all<address>
+| add_for_all
+| remove_for_all
 
-entry update_operators_for_all (upl : list<update_for_all_op>) {
+record update_for_all_param {
+  upfa_op_type : update_for_all_op;
+  upfa_op  : address;
+}
+
+entry update_operators_for_all (upfa_operators : list<update_for_all_param>) {
   require { fa2_r2 : is_not_paused() }
   effect {
-    for up in upl do
-      match up with
-      | add_for_all(op)  ->
-          operator_for_all.put({ op; caller })
-      | remove_for_all(op) ->
-          operator_for_all.remove((op, caller))
+    for op in upfa_operators do
+      match op.upfa_op_type with
+      | add_for_all  ->
+          operator_for_all.put({ op.upfa_op; caller })
+      | remove_for_all ->
+          operator_for_all.remove((op.upfa_op, caller))
       end;
     done;
+  }
+}
+
+entry update_operator_for_all_gasless (upfa_operator : update_for_all_param, upfa_pubk: key, upfa_sig: signature) {
+  require { fa2_r2b : is_not_paused() }
+  effect {
+    const seller_address = key_to_address(upfa_pubk);
+    transfer 0tz to permits call check<key * signature * bytes>((upfa_pubk, upfa_sig, pack(upfa_operator)));
+    match upfa_operator.upfa_op_type with
+    | add_for_all  ->
+        operator_for_all.put({ upfa_operator.upfa_op; seller_address })
+    | remove_for_all ->
+        operator_for_all.remove((upfa_operator.upfa_op, seller_address))
+    end;
   }
 }
 
@@ -258,50 +290,57 @@ entry transfer_gasless (batch : list<gasless_param>) {
           const is_authorized ?= call_view<string>(whitelist, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
           do_require(is_authorized = "", is_authorized);
           const tid = td.token_id_dest;
-          const amount = ledger[(%from, tid)]?.lamount ? the : 0;
+          const amount = ledger[(%from, tid)]?.ledger_token_amount ? the : 0;
           const new_amount ?=
               int_to_nat(amount - td.token_amount_dest) : FA2_INSUFFICIENT_BALANCE;
           if new_amount = 0 then
             ledger.remove((%from, tid))
           else begin
-            ledger.update((%from, tid), { lamount := new_amount });
+            ledger.update((%from, tid), { ledger_token_amount := new_amount });
           end;
-          ledger.add_update((td.to_dest, tid), { lamount += td.token_amount_dest })
-        end
-        done
+          ledger.add_update((td.to_dest, tid), { ledger_token_amount += td.token_amount_dest });
+          if caller <> marketplace then begin
+            transfer 0tz to marketplace_storage call cancel_matching_orders<address * nat * address>((self_address, tid, %from));
+          end
+      end done
       done
     done
   }
 }
 
-entry %transfer (txs : list<transfer_param>) {
-  require { fa2_r4 : is_not_paused() }
+entry %transfer (transfers : list<transfer_param>) {
+  require {
+    fa2_r4 : is_not_paused()
+  }
   effect {
-    if not check_operator(txs) then begin
-      match get_from(txs) with
+    if not check_operator(transfers) then begin
+      match get_from(transfers) with
       | some(%from) ->
         transfer 0tz to permits
-          call consume<address * bytes * string>((%from, pack(txs), FA2_NOT_OPERATOR))
+          call consume<address * bytes * string>((%from, pack(transfers), FA2_NOT_OPERATOR))
       | none -> ()
       end
     end;
 
-    for tx in txs do
+    for tx in transfers do
       const %from = tx.tp_from;
       const tds   = tx.tp_txs;
       for td in tds do begin
         const is_authorized ?= call_view<string>(whitelist, "assert_transfer", (caller, %from, td.to_dest)) : "ASSERT_TRANSFER_FAILED";
         do_require(is_authorized = "", is_authorized);
         const tid = td.token_id_dest;
-        const amount = ledger[(%from, tid)]?.lamount ? the : 0;
+        const amount = ledger[(%from, tid)]?.ledger_token_amount ? the : 0;
         const new_amount ?=
             int_to_nat(amount - td.token_amount_dest) : FA2_INSUFFICIENT_BALANCE;
         if new_amount = 0 then
           ledger.remove((%from, tid))
         else begin
-          ledger.update((%from, tid), { lamount := new_amount });
+          ledger.update((%from, tid), { ledger_token_amount := new_amount });
         end;
-        ledger.add_update((td.to_dest, tid), { lamount += td.token_amount_dest })
+        ledger.add_update((td.to_dest, tid), { ledger_token_amount += td.token_amount_dest });
+        if caller <> marketplace then begin
+          transfer 0tz to marketplace_storage call cancel_matching_orders<address * nat * address>((self_address, tid, %from));
+        end
       end done
     done
   }
@@ -314,7 +353,7 @@ entry mint (mints : list<mint_param>, tdata: map<string, bytes>) {
     for mint_arg in mints do
       const is_authorized ?= call_view<bool>(whitelist, "assert_receiver", mint_arg.mint_dest) : "ASSERT_RECEIVER_FAILED";
       do_require(is_authorized = true, ("UNAUTHORIZED _USER", mint_arg.mint_dest));
-      ledger.add_update((mint_arg.mint_dest, token_id_sequence), { lamount += mint_arg.mint_amount });
+      ledger.add_update((mint_arg.mint_dest, token_id_sequence), { ledger_token_amount += mint_arg.mint_amount });
     done;
     token_metadata.add_update(token_id_sequence, { token_id = token_id_sequence; token_info = tdata });
     token_id_sequence := token_id_sequence + 1;
@@ -323,7 +362,7 @@ entry mint (mints : list<mint_param>, tdata: map<string, bytes>) {
 
 entry burn(tid : nat, nbt : nat) {
   constant {
-    amount ?is ledger[(caller, tid)]?.lamount otherwise FA2_INSUFFICIENT_BALANCE
+    amount ?is ledger[(caller, tid)]?.ledger_token_amount otherwise FA2_INSUFFICIENT_BALANCE
   }
   require {
     fa2_r6: is_not_paused();
@@ -331,7 +370,7 @@ entry burn(tid : nat, nbt : nat) {
   }
   effect {
     if (amount > nbt) then
-      ledger.update((caller, tid), { lamount -= nbt })
+      ledger.update((caller, tid), { ledger_token_amount -= nbt })
     else begin
       ledger.remove((caller, tid));
       token_metadata.remove(tid)
@@ -353,9 +392,7 @@ record balance_of_response {
 
 getter balance_of (requests : list<balance_of_request>) : list<balance_of_response> {
   return map(requests, br ->
-    let b =
-      if br.btoken_id <> TOKEN_ID then 0
-      else (ledger[(br.bo_owner, br.btoken_id)] ? the.lamount : 0) in
+    let b = (ledger[(br.bo_owner, br.btoken_id)] ? the.ledger_token_amount : 0) in
     {
       request = br;
       balance_ = b
@@ -363,5 +400,5 @@ getter balance_of (requests : list<balance_of_request>) : list<balance_of_respon
 }
 
 view get_balance (gb_request : balance_of_request) : option<nat> {
-  return ledger[(gb_request.bo_owner, gb_request.btoken_id)]?.lamount
+  return ledger[(gb_request.bo_owner, gb_request.btoken_id)]?.ledger_token_amount
 }
