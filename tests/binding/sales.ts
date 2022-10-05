@@ -53,6 +53,18 @@ export class buy_param implements att.ArchetypeType {
         return (this.buy_sale_id.equals(v.buy_sale_id) && this.buy_sale_id.equals(v.buy_sale_id) && this.buy_qty.equals(v.buy_qty));
     }
 }
+export class auth_buy_param implements att.ArchetypeType {
+    constructor(public auth_b_param: buy_param, public auth_b_sig: att.Signature) { }
+    toString(): string {
+        return JSON.stringify(this, null, 2);
+    }
+    to_mich(): att.Micheline {
+        return att.pair_to_mich([this.auth_b_param.to_mich(), this.auth_b_sig.to_mich()]);
+    }
+    equals(v: auth_buy_param): boolean {
+        return (this.auth_b_param == v.auth_b_param && this.auth_b_param == v.auth_b_param && this.auth_b_sig.equals(v.auth_b_sig));
+    }
+}
 export class balance_of_request implements att.ArchetypeType {
     constructor(public bor_owner: att.Address, public bor_token_id: att.Nat) { }
     toString(): string {
@@ -87,6 +99,13 @@ export const transfer_param_mich_type: att.MichelineType = att.pair_array_to_mic
 export const buy_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
     att.prim_annot_to_mich_type("nat", ["%buy_sale_id"]),
     att.prim_annot_to_mich_type("nat", ["%buy_qty"])
+], []);
+export const auth_buy_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
+    att.pair_array_to_mich_type([
+        att.prim_annot_to_mich_type("nat", ["%buy_sale_id"]),
+        att.prim_annot_to_mich_type("nat", ["%buy_qty"])
+    ], ["%auth_b_param"]),
+    att.prim_annot_to_mich_type("signature", ["%auth_b_sig"])
 ], []);
 export const balance_of_request_mich_type: att.MichelineType = att.pair_array_to_mich_type([
     att.prim_annot_to_mich_type("address", ["%owner"]),
@@ -140,6 +159,16 @@ export const mich_to_buy_param = (v: att.Micheline, collapsed: boolean = false):
     }
     return new buy_param(att.mich_to_nat(fields[0]), att.mich_to_nat(fields[1]));
 };
+export const mich_to_auth_buy_param = (v: att.Micheline, collapsed: boolean = false): auth_buy_param => {
+    let fields: att.Micheline[] = [];
+    if (collapsed) {
+        fields = att.mich_to_pairs(v);
+    }
+    else {
+        fields = att.annotated_mich_to_array(v, auth_buy_param_mich_type);
+    }
+    return new auth_buy_param(mich_to_buy_param(fields[0], collapsed), att.mich_to_signature(fields[1]));
+};
 export const mich_to_balance_of_request = (v: att.Micheline, collapsed: boolean = false): balance_of_request => {
     let fields: att.Micheline[] = [];
     if (collapsed) {
@@ -186,11 +215,12 @@ const sell_arg_to_mich = (s_sale: sale, s_seller_pubk: att.Key, s_sig: att.Signa
         s_sig.to_mich()
     ]);
 }
-const buy_arg_to_mich = (b_param: buy_param, b_buyer_pubk: att.Key, b_sig: att.Signature): att.Micheline => {
+const buy_arg_to_mich = (b_param: buy_param, b_buyer_pubk: att.Key, b_sig: att.Signature, b_auth_sig: att.Signature): att.Micheline => {
     return att.pair_to_mich([
         b_param.to_mich(),
         b_buyer_pubk.to_mich(),
-        b_sig.to_mich()
+        b_sig.to_mich(),
+        b_auth_sig.to_mich()
     ]);
 }
 const cancel_sale_arg_to_mich = (cs_sale_id: att.Nat, cs_seller_pubk: att.Key, cs_sig: att.Signature): att.Micheline => {
@@ -217,11 +247,12 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(owner: att.Address, sales_storage: att.Address, permits: att.Address, params: Partial<ex.Parameters>) {
+    async deploy(owner: att.Address, sales_storage: att.Address, permits: att.Address, signer: att.Key, params: Partial<ex.Parameters>) {
         const address = await ex.deploy("./contracts/sales.arl", {
             owner: owner.to_mich(),
             sales_storage: sales_storage.to_mich(),
-            permits: permits.to_mich()
+            permits: permits.to_mich(),
+            signer: signer.to_mich()
         }, params);
         this.address = address;
     }
@@ -261,9 +292,9 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async buy(b_param: buy_param, b_buyer_pubk: att.Key, b_sig: att.Signature, params: Partial<ex.Parameters>): Promise<any> {
+    async buy(b_param: buy_param, b_buyer_pubk: att.Key, b_sig: att.Signature, b_auth_sig: att.Signature, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
-            return await ex.call(this.address, "buy", buy_arg_to_mich(b_param, b_buyer_pubk, b_sig), params);
+            return await ex.call(this.address, "buy", buy_arg_to_mich(b_param, b_buyer_pubk, b_sig, b_auth_sig), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -315,9 +346,9 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async get_buy_param(b_param: buy_param, b_buyer_pubk: att.Key, b_sig: att.Signature, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+    async get_buy_param(b_param: buy_param, b_buyer_pubk: att.Key, b_sig: att.Signature, b_auth_sig: att.Signature, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "buy", buy_arg_to_mich(b_param, b_buyer_pubk, b_sig), params);
+            return await ex.get_call_param(this.address, "buy", buy_arg_to_mich(b_param, b_buyer_pubk, b_sig, b_auth_sig), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -351,6 +382,13 @@ export class Sales {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
             return new att.Address(storage.permits);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_signer(): Promise<att.Key> {
+        if (this.address != undefined) {
+            const storage = await ex.get_storage(this.address);
+            return new att.Key(storage.signer);
         }
         throw new Error("Contract not initialised");
     }

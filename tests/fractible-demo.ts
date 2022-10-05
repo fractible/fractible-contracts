@@ -22,9 +22,16 @@ import {
 const assert = require("assert");
 
 /* Contracts */
-
 import {royalties} from "./binding/royalties";
-import {add as add_sales, buy_param, buy_param_mich_type, sale, sale_mich_type, sales} from "./binding/sales";
+import {
+	add as add_sales,
+	auth_buy_param, auth_buy_param_mich_type,
+	buy_param,
+	buy_param_mich_type,
+	sale,
+	sale_mich_type,
+	sales
+} from "./binding/sales";
 import {add as add_sales_storage, sales_storage} from "./binding/sales_storage";
 import {transfer_manager} from "./binding/transfer_manager";
 import {users_storage} from "./binding/users_storage";
@@ -39,6 +46,7 @@ import {
   update_for_all_param, update_for_all_param_mich_type
 } from "./binding/nft";
 import {add as add_permit, permits} from "./binding/permits";
+import {Signature} from "@completium/archetype-ts-types/src/main";
 
 /* Accounts ----------------------------------------------------------------- */
 
@@ -106,6 +114,7 @@ describe("Contracts deployment", async () => {
 		await sales.deploy(alice.get_address(),
 			sales_storage.get_address(),
 			permits.get_address(),
+			carl.get_public_key(),
 			{as: alice});
 	});
 	it("NFT contract deployment should succeed", async () => {
@@ -207,7 +216,17 @@ describe("Marketplace tests", async () => {
 			permits.get_address(),
 			counter);
 		const signature = await bob.sign(after_permit_data)
-		await sales.buy(buy_data, bob.get_public_key(), signature, {as: alice})
+
+		const permit_auth = await permits.get_permits_value(carl.get_address())
+		const counter_auth = permit_auth?.counter
+		const auth_sig_data = new auth_buy_param(buy_data, signature)
+		const packed_sig_data = pack(auth_sig_data.to_mich(), auth_buy_param_mich_type)
+		const after_permit_sig_data = await get_permit_data(
+			packed_sig_data,
+			permits.get_address(),
+			counter_auth);
+		const signature_auth = await carl.sign(after_permit_sig_data)
+		await sales.buy(buy_data, bob.get_public_key(), signature, signature_auth, {as: alice})
 	});
 });
 

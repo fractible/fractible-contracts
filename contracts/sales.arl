@@ -1,7 +1,8 @@
 archetype sales(
     owner: address,
     sales_storage: address,
-    permits: address
+    permits: address,
+    signer: key,
 )
 with metadata ""
 
@@ -102,6 +103,11 @@ record buy_param {
   buy_qty: nat;
 }
 
+record auth_buy_param {
+  auth_b_param: buy_param;
+  auth_b_sig: signature;
+}
+
 record balance_of_request {
   bor_owner : address;
   bor_token_id : nat;
@@ -153,7 +159,8 @@ entry sell (
 entry buy(
   b_param: buy_param,
   b_buyer_pubk: key,
-  b_sig: signature){
+  b_sig: signature,
+  b_auth_sig: signature){
     constant {
       stored_sale ?is get_sale(b_param.buy_sale_id) otherwise "MISSING_SALE";
       stored_sale_stock is stored_sale.sale_qty;
@@ -167,6 +174,12 @@ entry buy(
     effect {
       var packed_data = pack((b_param.buy_sale_id, b_param.buy_qty));
       transfer 0tz to permits call check<key * signature * bytes>((b_buyer_pubk, b_sig, packed_data));
+      const auth_payload: auth_buy_param = {
+            auth_b_param=b_param;
+            auth_b_sig=b_sig
+      };
+      var packed_sig = pack(auth_payload);
+      transfer 0tz to permits call check<key * signature * bytes>((signer, b_auth_sig, packed_sig));
       match stored_sale_end with
       | some(end_date) -> begin
         do_require(end_date > now, SALE_CLOSED);
