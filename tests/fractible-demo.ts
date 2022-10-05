@@ -1,28 +1,27 @@
 import {
-  blake2b,
-  exec_batch,
-  expect_to_fail,
-  get_account, is_mockup, pack,
-  set_mockup,
-  set_mockup_now,
-  set_quiet, sign
+	blake2b,
+	exec_batch,
+	expect_to_fail,
+	get_account, is_mockup, pack,
+	set_mockup,
+	set_mockup_now,
+	set_quiet, sign
 } from "@completium/experiment-ts";
 import {
-  Address,
-  Bytes, mich_array_to_mich,
-  Nat,
-  Option,
-  Or, or_to_mich_type,
-  pair_array_to_mich_type,
-  prim_annot_to_mich_type, string_to_mich,
-  Tez
+	Address,
+	Bytes, mich_array_to_mich,
+	Nat,
+	Option,
+	Or, or_to_mich_type,
+	pair_array_to_mich_type,
+	prim_annot_to_mich_type, string_to_mich,
+	Tez
 } from "@completium/archetype-ts-types";
 
 
 const assert = require("assert");
 
 /* Contracts */
-import {royalties} from "./binding/royalties";
 import {
 	add as add_sales,
 	auth_buy_param, auth_buy_param_mich_type,
@@ -33,26 +32,21 @@ import {
 	sales
 } from "./binding/sales";
 import {add as add_sales_storage, sales_storage} from "./binding/sales_storage";
-import {transfer_manager} from "./binding/transfer_manager";
 import {users_storage} from "./binding/users_storage";
 import {whitelist} from "./binding/whitelist";
 import {
-  add_for_all,
-  mint_param,
-  nft,
-  operator_param,
-  update_for_all_op,
-  update_for_all_op_types,
-  update_for_all_param, update_for_all_param_mich_type
+	add_for_all,
+	mint_param,
+	nft,
+	update_for_all_param, update_for_all_param_mich_type
 } from "./binding/nft";
 import {add as add_permit, permits} from "./binding/permits";
-import {Signature} from "@completium/archetype-ts-types/src/main";
 
 /* Accounts ----------------------------------------------------------------- */
 
 const alice = get_account("alice");
 const bob = get_account("bob");
-const carl = get_account("carl");
+const admin = get_account("carl");
 const user1 = get_account("bootstrap1");
 const user2 = get_account("bootstrap2");
 const user3 = get_account("bootstrap3");
@@ -73,27 +67,27 @@ set_mockup_now(now);
 
 /* Constants & Utils ------------------------------------------------------- */
 const permit_data_type = pair_array_to_mich_type([
-  pair_array_to_mich_type([
-    prim_annot_to_mich_type("address", []),
-    prim_annot_to_mich_type("chain_id", [])
-  ]),
-  pair_array_to_mich_type([
-    prim_annot_to_mich_type("nat", []),
-    prim_annot_to_mich_type("bytes", [])
-  ])
+	pair_array_to_mich_type([
+		prim_annot_to_mich_type("address", []),
+		prim_annot_to_mich_type("chain_id", [])
+	]),
+	pair_array_to_mich_type([
+		prim_annot_to_mich_type("nat", []),
+		prim_annot_to_mich_type("bytes", [])
+	])
 ])
 
 const get_permit_data = (ptps: Bytes, contract: Address, permit_counter: Nat | undefined): Bytes => {
-  let counter = new Nat(0)
-  if (permit_counter != undefined) {
-    counter = permit_counter
-  }
-  const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
-  const permit_data = mich_array_to_mich([
-    mich_array_to_mich([contract.to_mich(), string_to_mich(chain_id)]),
-    mich_array_to_mich([counter.to_mich(), ptps.to_mich()])
-  ])
-  return pack(permit_data, permit_data_type);
+	let counter = new Nat(0)
+	if (permit_counter != undefined) {
+		counter = permit_counter
+	}
+	const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
+	const permit_data = mich_array_to_mich([
+		mich_array_to_mich([contract.to_mich(), string_to_mich(chain_id)]),
+		mich_array_to_mich([counter.to_mich(), ptps.to_mich()])
+	])
+	return pack(permit_data, permit_data_type);
 }
 
 /* Scenarios --------------------------------------------------------------- */
@@ -114,11 +108,16 @@ describe("Contracts deployment", async () => {
 		await sales.deploy(alice.get_address(),
 			sales_storage.get_address(),
 			permits.get_address(),
-			carl.get_public_key(),
+			admin.get_public_key(),
 			{as: alice});
 	});
 	it("NFT contract deployment should succeed", async () => {
-		await nft.deploy(alice.get_address(), permits.get_address(), whitelist.get_address(), sales.get_address(), sales_storage.get_address(), {as: alice});
+		await nft.deploy(alice.get_address(),
+			permits.get_address(),
+			whitelist.get_address(),
+			sales.get_address(),
+			sales_storage.get_address(),
+			{as: alice});
 	});
 });
 
@@ -137,9 +136,9 @@ describe("Set up", async () => {
 				await whitelist.get_update_users_param([
 					[alice.get_address(), Option.Some<Nat>(new Nat(0))],
 					[bob.get_address(), Option.Some<Nat>(new Nat(0))],
-					[carl.get_address(), Option.Some<Nat>(new Nat(0))]
+					[admin.get_address(), Option.Some<Nat>(new Nat(0))]
 				], {as: alice}),
-                await nft.get_set_marketplace_param(sales_storage.get_address(), {as: alice}),
+				await nft.get_set_marketplace_param(sales_storage.get_address(), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(nft.get_address()), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(sales.get_address()), {as: alice})
 			],
@@ -148,22 +147,22 @@ describe("Set up", async () => {
 	});
 
 	it("Update operator NFT", async () => {
-      const permit = await permits.get_permits_value(alice.get_address())
-      const counter = permit?.counter
-      const data = new update_for_all_param(new add_for_all(), sales.get_address())
-      const packed_sales_data = pack(data.to_mich(), update_for_all_param_mich_type)
-      const after_permit_data = await get_permit_data(
-          packed_sales_data,
-          permits.get_address(),
-          counter);
-      const signature = await alice.sign(after_permit_data)
-      await nft.update_operator_for_all_gasless(data, alice.get_public_key(), signature, {as: bob});
+		const permit = await permits.get_permits_value(alice.get_address())
+		const counter = permit?.counter
+		const data = new update_for_all_param(new add_for_all(), sales.get_address())
+		const packed_sales_data = pack(data.to_mich(), update_for_all_param_mich_type)
+		const after_permit_data = await get_permit_data(
+			packed_sales_data,
+			permits.get_address(),
+			counter);
+		const signature = await alice.sign(after_permit_data)
+		await nft.update_operator_for_all_gasless(data, alice.get_public_key(), signature, {as: bob});
 	});
 });
 describe("Minting", async () => {
 	it("Mint NFT", async () => {
 		await nft.mint([new mint_param(alice.get_address(), new Nat(10)), new mint_param(bob.get_address(),
-			new Nat(10)), new mint_param(carl.get_address(), new Nat(10))], [], {as: alice});
+			new Nat(10)), new mint_param(admin.get_address(), new Nat(10))], [], {as: alice});
 	});
 });
 
@@ -192,17 +191,36 @@ describe("Marketplace tests", async () => {
 		await sales.sell(sale_data, alice.get_public_key(), signature, {as: bob})
 	});
 
-	// it("Buy NFT as User1 should fail", async () => {
-	// 	await sales.buy(nft.get_address(),
-	// 		new Nat(0),
-	// 		alice.get_address(),
-	// 		new XTZ(),
-	// 		new Bytes(""),
-	// 		new Nat(1),
-	// 		[],
-	// 		[],
-	// 		{as: user1, amount: new Tez(0.1)});
-	// });
+	it("Buy NFT as User1 should fail", async () => {
+		await expect_to_fail(async () => {
+
+			const buy_data = new buy_param(
+				new Nat(0),
+				new Nat(1)
+			)
+			const permit = await permits.get_permits_value(user1.get_address())
+			const counter = permit?.counter
+			const packed_buy_data = pack(buy_data.to_mich(), buy_param_mich_type)
+			const after_permit_data = await get_permit_data(
+				packed_buy_data,
+				permits.get_address(),
+				counter);
+			const signature = await user1.sign(after_permit_data)
+
+			const permit_auth = await permits.get_permits_value(admin.get_address())
+			const counter_auth = permit_auth?.counter
+			const auth_sig_data = new auth_buy_param(buy_data, signature)
+			const packed_sig_data = pack(auth_sig_data.to_mich(), auth_buy_param_mich_type)
+			const after_permit_sig_data = await get_permit_data(
+				packed_sig_data,
+				permits.get_address(),
+				counter_auth);
+			const signature_auth = await admin.sign(after_permit_sig_data)
+			await sales.buy(buy_data, user1.get_public_key(), signature, signature_auth, {as: alice})
+		}, whitelist.errors.TO_RESTRICTED);
+
+	});
+
 	it("Buy NFT as Bob should succeed", async () => {
 		const buy_data = new buy_param(
 			new Nat(0),
@@ -217,7 +235,7 @@ describe("Marketplace tests", async () => {
 			counter);
 		const signature = await bob.sign(after_permit_data)
 
-		const permit_auth = await permits.get_permits_value(carl.get_address())
+		const permit_auth = await permits.get_permits_value(admin.get_address())
 		const counter_auth = permit_auth?.counter
 		const auth_sig_data = new auth_buy_param(buy_data, signature)
 		const packed_sig_data = pack(auth_sig_data.to_mich(), auth_buy_param_mich_type)
@@ -225,7 +243,7 @@ describe("Marketplace tests", async () => {
 			packed_sig_data,
 			permits.get_address(),
 			counter_auth);
-		const signature_auth = await carl.sign(after_permit_sig_data)
+		const signature_auth = await admin.sign(after_permit_sig_data)
 		await sales.buy(buy_data, bob.get_public_key(), signature, signature_auth, {as: alice})
 	});
 });
