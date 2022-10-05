@@ -199,8 +199,8 @@ const declare_ownership_arg_to_mich = (candidate: att.Address): att.Micheline =>
 const claim_ownership_arg_to_mich = (): att.Micheline => {
     return att.unit_mich;
 }
-const set_sales_storage_contract_arg_to_mich = (sesc_contract: att.Address): att.Micheline => {
-    return sesc_contract.to_mich();
+const set_marketplace_storage_contract_arg_to_mich = (smsc_contract: att.Address): att.Micheline => {
+    return smsc_contract.to_mich();
 }
 const set_permits_arg_to_mich = (sp_contract: att.Address): att.Micheline => {
     return sp_contract.to_mich();
@@ -233,7 +233,7 @@ const cancel_sale_arg_to_mich = (cs_sale_id: att.Nat, cs_seller_pubk: att.Key, c
 const default_arg_to_mich = (): att.Micheline => {
     return att.unit_mich;
 }
-export class Sales {
+export class Marketplace {
     address: string | undefined;
     get_address(): att.Address {
         if (undefined != this.address) {
@@ -247,10 +247,10 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(owner: att.Address, sales_storage: att.Address, permits: att.Address, signer: att.Key, params: Partial<ex.Parameters>) {
-        const address = await ex.deploy("./contracts/sales.arl", {
+    async deploy(owner: att.Address, marketplace_storage: att.Address, permits: att.Address, signer: att.Key, params: Partial<ex.Parameters>) {
+        const address = await ex.deploy("./contracts/marketplace.arl", {
             owner: owner.to_mich(),
-            sales_storage: sales_storage.to_mich(),
+            marketplace_storage: marketplace_storage.to_mich(),
             permits: permits.to_mich(),
             signer: signer.to_mich()
         }, params);
@@ -268,9 +268,9 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async set_sales_storage_contract(sesc_contract: att.Address, params: Partial<ex.Parameters>): Promise<any> {
+    async set_marketplace_storage_contract(smsc_contract: att.Address, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
-            return await ex.call(this.address, "set_sales_storage_contract", set_sales_storage_contract_arg_to_mich(sesc_contract), params);
+            return await ex.call(this.address, "set_marketplace_storage_contract", set_marketplace_storage_contract_arg_to_mich(smsc_contract), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -322,9 +322,9 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async get_set_sales_storage_contract_param(sesc_contract: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+    async get_set_marketplace_storage_contract_param(smsc_contract: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "set_sales_storage_contract", set_sales_storage_contract_arg_to_mich(sesc_contract), params);
+            return await ex.get_call_param(this.address, "set_marketplace_storage_contract", set_marketplace_storage_contract_arg_to_mich(smsc_contract), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -371,10 +371,10 @@ export class Sales {
         }
         throw new Error("Contract not initialised");
     }
-    async get_sales_storage(): Promise<att.Address> {
+    async get_marketplace_storage(): Promise<att.Address> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            return new att.Address(storage.sales_storage);
+            return new att.Address(storage.marketplace_storage);
         }
         throw new Error("Contract not initialised");
     }
@@ -454,4 +454,4 @@ export class Sales {
         MISSING_CANDIDATE: att.string_to_mich("\"MISSING_CANDIDATE\"")
     };
 }
-export const sales = new Sales();
+export const marketplace = new Marketplace();

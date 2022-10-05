@@ -29,10 +29,10 @@ import {
 	buy_param_mich_type,
 	sale,
 	sale_mich_type,
-	sales
-} from "./binding/sales";
-import {add as add_sales_storage, sales_storage} from "./binding/sales_storage";
-import {users_storage} from "./binding/users_storage";
+	marketplace
+} from "./binding/marketplace";
+import {add as add_sales_storage, marketplace_storage} from "./binding/marketplace_storage";
+import {whitelist_storage} from "./binding/whitelist_storage";
 import {whitelist} from "./binding/whitelist";
 import {
 	add_for_all,
@@ -93,20 +93,20 @@ const get_permit_data = (ptps: Bytes, contract: Address, permit_counter: Nat | u
 /* Scenarios --------------------------------------------------------------- */
 describe("Contracts deployment", async () => {
 	it("Whitelist storage contract deployment should succeed", async () => {
-		await users_storage.deploy(alice.get_address(), {as: alice});
+		await whitelist_storage.deploy(alice.get_address(), {as: alice});
 	});
 	it("Sales storage contract deployment should succeed", async () => {
-		await sales_storage.deploy(alice.get_address(), {as: alice});
+		await marketplace_storage.deploy(alice.get_address(), {as: alice});
 	});
 	it("Whitelist contract deployment should succeed", async () => {
-		await whitelist.deploy(alice.get_address(), users_storage.get_address(), {as: alice});
+		await whitelist.deploy(alice.get_address(), whitelist_storage.get_address(), {as: alice});
 	});
 	it("Permits contract deployment should succeed", async () => {
 		await permits.deploy(alice.get_address(), {as: alice});
 	});
 	it("Sales contract deployment should succeed", async () => {
-		await sales.deploy(alice.get_address(),
-			sales_storage.get_address(),
+		await marketplace.deploy(alice.get_address(),
+			marketplace_storage.get_address(),
 			permits.get_address(),
 			admin.get_public_key(),
 			{as: alice});
@@ -115,8 +115,8 @@ describe("Contracts deployment", async () => {
 		await nft.deploy(alice.get_address(),
 			permits.get_address(),
 			whitelist.get_address(),
-			sales.get_address(),
-			sales_storage.get_address(),
+			marketplace.get_address(),
+			marketplace_storage.get_address(),
 			{as: alice});
 	});
 });
@@ -127,20 +127,20 @@ describe("Set up", async () => {
 				await whitelist.get_update_transfer_list_param(new Nat(0),
 					Option.Some<[boolean, Nat[]]>([true, [new Nat(0)]]),
 					{as: alice}),
-				await users_storage.get_add_whitelister_param(whitelist.get_address(), {as: alice}),
+				await whitelist_storage.get_add_whitelister_param(whitelist.get_address(), {as: alice}),
 				await whitelist.get_add_whitelister_param(alice.get_address(), {as: alice}),
 				await whitelist.get_add_super_user_param(alice.get_address(), {as: alice}),
-				await sales.get_manage_authorization_param(new add_sales(alice.get_address()), {as: alice}),
-				await sales_storage.get_manage_authorization_param(new add_sales_storage(sales.get_address()), {as: alice}),
-				await sales_storage.get_manage_authorization_param(new add_sales_storage(nft.get_address()), {as: alice}),
+				await marketplace.get_manage_authorization_param(new add_sales(alice.get_address()), {as: alice}),
+				await marketplace_storage.get_manage_authorization_param(new add_sales_storage(marketplace.get_address()), {as: alice}),
+				await marketplace_storage.get_manage_authorization_param(new add_sales_storage(nft.get_address()), {as: alice}),
 				await whitelist.get_update_users_param([
 					[alice.get_address(), Option.Some<Nat>(new Nat(0))],
 					[bob.get_address(), Option.Some<Nat>(new Nat(0))],
 					[admin.get_address(), Option.Some<Nat>(new Nat(0))]
 				], {as: alice}),
-				await nft.get_set_marketplace_param(sales_storage.get_address(), {as: alice}),
+				await nft.get_set_marketplace_param(marketplace_storage.get_address(), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(nft.get_address()), {as: alice}),
-				await permits.get_manage_consumer_param(new add_permit(sales.get_address()), {as: alice})
+				await permits.get_manage_consumer_param(new add_permit(marketplace.get_address()), {as: alice})
 			],
 			{as: alice}
 		)
@@ -149,7 +149,7 @@ describe("Set up", async () => {
 	it("Update operator NFT", async () => {
 		const permit = await permits.get_permits_value(alice.get_address())
 		const counter = permit?.counter
-		const data = new update_for_all_param(new add_for_all(), sales.get_address())
+		const data = new update_for_all_param(new add_for_all(), marketplace.get_address())
 		const packed_sales_data = pack(data.to_mich(), update_for_all_param_mich_type)
 		const after_permit_data = await get_permit_data(
 			packed_sales_data,
@@ -188,7 +188,7 @@ describe("Marketplace tests", async () => {
 			permits.get_address(),
 			counter);
 		const signature = await alice.sign(after_permit_data)
-		await sales.sell(sale_data, alice.get_public_key(), signature, {as: bob})
+		await marketplace.sell(sale_data, alice.get_public_key(), signature, {as: bob})
 	});
 
 	it("Buy NFT as User1 should fail", async () => {
@@ -216,7 +216,7 @@ describe("Marketplace tests", async () => {
 				permits.get_address(),
 				counter_auth);
 			const signature_auth = await admin.sign(after_permit_sig_data)
-			await sales.buy(buy_data, user1.get_public_key(), signature, signature_auth, {as: alice})
+			await marketplace.buy(buy_data, user1.get_public_key(), signature, signature_auth, {as: alice})
 		}, whitelist.errors.TO_RESTRICTED);
 
 	});
@@ -244,7 +244,7 @@ describe("Marketplace tests", async () => {
 			permits.get_address(),
 			counter_auth);
 		const signature_auth = await admin.sign(after_permit_sig_data)
-		await sales.buy(buy_data, bob.get_public_key(), signature, signature_auth, {as: alice})
+		await marketplace.buy(buy_data, bob.get_public_key(), signature, signature_auth, {as: alice})
 	});
 });
 

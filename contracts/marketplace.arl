@@ -1,6 +1,6 @@
-archetype sales(
+archetype marketplace(
     owner: address,
-    sales_storage: address,
+    marketplace_storage: address,
     permits: address,
     signer: key,
 )
@@ -56,10 +56,10 @@ entry claim_ownership() {
 //----------------------------------------------------------------------------
 // Admin
 //----------------------------------------------------------------------------
-entry set_sales_storage_contract(sesc_contract : address) {
+entry set_marketplace_storage_contract(smsc_contract : address) {
   called by owner
   effect {
-    sales_storage := sesc_contract;
+    marketplace_storage := smsc_contract;
   }
 }
 
@@ -151,7 +151,7 @@ entry sell (
       end
       | none -> ()
       end;
-      transfer 0tz to sales_storage call set_sale<sale>(s_sale);
+      transfer 0tz to marketplace_storage call set_sale<sale>(s_sale);
     }
 }
 
@@ -210,10 +210,10 @@ entry buy(
       );
 
       if(b_param.buy_qty = stored_sale_stock) then (
-        transfer 0tz to sales_storage call remove_sale<nat>(b_param.buy_sale_id)
+        transfer 0tz to marketplace_storage call remove_sale<nat>(b_param.buy_sale_id)
       ) else (
         stored_sale.sale_qty := abs(stored_sale.sale_qty - b_param.buy_qty);
-        transfer 0tz to sales_storage call update_sale<nat * sale>(
+        transfer 0tz to marketplace_storage call update_sale<nat * sale>(
           (
             b_param.buy_sale_id,
             stored_sale
@@ -239,13 +239,13 @@ entry cancel_sale(
     effect {
       var packed_data = pack(cs_sale_id);
       transfer 0tz to permits call check<key * signature * bytes>((cs_seller_pubk, cs_sig, packed_data));
-      transfer 0tz to sales_storage call remove_sale<nat>(cs_sale_id)
+      transfer 0tz to marketplace_storage call remove_sale<nat>(cs_sale_id)
     }
 }
 
 function sale_exists(se_sale_id: nat) : bool {
     return match call_view<bool>(
-        sales_storage,
+        marketplace_storage,
         "sale_exists",
         se_sale_id
     )
@@ -258,7 +258,7 @@ function sale_exists(se_sale_id: nat) : bool {
 
 function get_sale(gs_sale_id: nat) : option<sale> {
     return (call_view<option<sale>>(
-        sales_storage,
+        marketplace_storage,
         "get_sale",
         gs_sale_id
     ) ? the : none<sale>)

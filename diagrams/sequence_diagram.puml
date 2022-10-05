@@ -1,0 +1,40 @@
+@startuml
+actor Seller as seller
+actor Buyer as buyer
+participant "Fractible" as fractible
+participant "Marketplace contract" as marketplace
+participant "Marketplace Storage contract" as marketplace_storage
+participant "NFT" as nft
+
+group NFT Transfer Authorisation
+    seller -> fractible: approve marketplace contract for transfers
+    fractible -> nft: [BLOCKCHAIN] update_operator_for_all(marketplace)
+end
+
+group Sell
+    buyer -> buyer: sign sell order
+    buyer -> fractible: send sell order
+    fractible -> marketplace: [BLOCKCHAIN] submit sale order
+    marketplace -> marketplace_storage: [BLOCKCHAIN] save sale
+end
+
+group Buy
+    buyer -> buyer: sign buy order
+    buyer -> fractible: send buy order
+    fractible -> fractible: check buyer balance
+    alt Balance OK
+        fractible -> fractible: sign buy order
+        fractible -> marketplace: [BLOCKCHAIN] submit buy order
+        marketplace -> nft: [BLOCKCHAIN] transfer NFT from seller to buyer
+    else Not enough balance
+        fractible -> buyer: reject buy order
+    end
+end
+
+group Cancel sale
+    seller -> seller: sign cancel order
+    seller -> fractible: send cancel order
+    fractible -> marketplace: [BLOCKCHAIN] submit cancel order
+    marketplace -> marketplace_storage: [BLOCKCHAIN] remove sale
+end
+@enduml

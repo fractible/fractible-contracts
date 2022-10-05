@@ -37,7 +37,7 @@ const update_arg_to_mich = (k: att.Address, v: att.Option<att.Nat>): att.Micheli
 const view_get_user_id_arg_to_mich = (k: att.Address): att.Micheline => {
     return k.to_mich();
 }
-export class Users_storage {
+export class Whitelist_storage {
     address: string | undefined;
     get_address(): att.Address {
         if (undefined != this.address) {
@@ -52,7 +52,7 @@ export class Users_storage {
         throw new Error("Contract not initialised");
     }
     async deploy(admin: att.Address, params: Partial<ex.Parameters>) {
-        const address = await ex.deploy("./contracts/users_storage.arl", {
+        const address = await ex.deploy("./contracts/whitelist_storage.arl", {
             admin: admin.to_mich()
         }, params);
         this.address = address;
@@ -243,4 +243,4 @@ export class Users_storage {
         MISSING_ADMIN_CANDIDATE: att.string_to_mich("\"MISSING_ADMIN_CANDIDATE\"")
     };
 }
-export const users_storage = new Users_storage();
+export const whitelist_storage = new Whitelist_storage();

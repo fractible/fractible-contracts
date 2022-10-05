@@ -191,7 +191,7 @@ const view_sale_exists_arg_to_mich = (se_sale_id: att.Nat): att.Micheline => {
 const view_get_sale_arg_to_mich = (gs_sale_id: att.Nat): att.Micheline => {
     return gs_sale_id.to_mich();
 }
-export class Sales_storage {
+export class Marketplace_storage {
     address: string | undefined;
     get_address(): att.Address {
         if (undefined != this.address) {
@@ -206,7 +206,7 @@ export class Sales_storage {
         throw new Error("Contract not initialised");
     }
     async deploy(owner: att.Address, params: Partial<ex.Parameters>) {
-        const address = await ex.deploy("./contracts/sales_storage.arl", {
+        const address = await ex.deploy("./contracts/marketplace_storage.arl", {
             owner: owner.to_mich()
         }, params);
         this.address = address;
@@ -413,4 +413,4 @@ export class Sales_storage {
         MISSING_CANDIDATE: att.string_to_mich("\"MISSING_CANDIDATE\"")
     };
 }
-export const sales_storage = new Sales_storage();
+export const marketplace_storage = new Marketplace_storage();

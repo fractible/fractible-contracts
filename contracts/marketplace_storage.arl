@@ -1,4 +1,4 @@
-archetype sales_storage(
+archetype marketplace_storage(
   owner: address
 )
 with metadata ""
