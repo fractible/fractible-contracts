@@ -1,32 +1,41 @@
 @startuml
-
-package "Some Group" {
-  HTTP - [First Component]
-  [Another Component]
-}
-
-node "Other Groups" {
-  FTP - [Second Component]
-  [First Component] --> FTP
-}
-
-cloud {
-  [Example 1]
-}
-
-
-database "MySql" {
-  folder "This is my folder" {
-    [Folder 3]
+package "Tezos" {
+  NODE_HTTP - [Blockchain node]
+  database "Blockchain" {
+    frame "Smart contracts" {
+       [Marketplace contract]
+       [Whitelist contract]
+       [Permit contract]
+       [NFT contract]
+    }
   }
-  frame "Foo" {
-    [Frame 4]
+  node "Tezos public infrastructure" {
+    TZKT_HTTP - [TZKT Indexer]
+    [TZKT Indexer] - TZKT_WS
+
   }
 }
 
 
-[Another Component] --> [Example 1]
-[Example 1] --> [Folder 3]
-[Folder 3] --> [Frame 4]
 
+cloud "Application Cloud" {
+  [Fractible frontend]
+  [Fractible indexer (DipDup)]
+  [Fractible backend]
+}
+
+cloud "HSM Cloud" {
+  PKCS11 - [HSM]
+}
+
+
+
+[Fractible backend] --> PKCS11
+[Fractible frontend] --> [Fractible backend]
+[Fractible backend] --> NODE_HTTP
+[Fractible backend] --> [Fractible indexer (DipDup)]
+
+[Fractible indexer (DipDup)] --> TZKT_HTTP
+[Fractible indexer (DipDup)] --> TZKT_WS
+[Blockchain node] --> Blockchain
 @enduml
