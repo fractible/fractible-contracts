@@ -1,6 +1,6 @@
 archetype whitelist(
   admin  : address,
-  users  : address
+  storage  : address
 )
 
 constant CONTRACT_NOT_PAUSED               : string = "CONTRACT_NOT_PAUSED"
@@ -95,10 +95,10 @@ entry remove_super_user (su : address) {
 //----------------------------------------------------------------------------
 // Users contract
 //----------------------------------------------------------------------------
-entry set_users_contract(users_contract: address) {
+entry set_storage_contract(storage_contract: address) {
   called by admin
   effect {
-    users := users_contract
+    storage := storage_contract
   }
 }
 
@@ -136,7 +136,7 @@ variable transfer_lists : big_map<nat, transfer_list> = []
 
 view assert_receiver(addr : address) : bool {
   var res = true;
-  const user_id ?= call_view<option<nat>>(users, "get_user_id", addr);
+  const user_id ?= call_view<option<nat>>(storage, "get_user_id", addr);
   match user_id with
   | some optv ->
     match some(optv) with
@@ -187,7 +187,7 @@ entry update_user (user : address, transfer_list_id : option<nat>) {
     r0: is_not_paused();
   }
   effect {
-    transfer 0tz to users call update<address * option<nat>>((user, transfer_list_id))
+    transfer 0tz to storage call update<address * option<nat>>((user, transfer_list_id))
   }
 }
 
@@ -200,7 +200,7 @@ entry update_users (utl : list<address * option<nat>>) {
     for i in utl do
       var user = i[0];
       var transfer_list_id = i[1];
-      transfer 0tz to users call update<address * option<nat>>((user, transfer_list_id))
+      transfer 0tz to storage call update<address * option<nat>>((user, transfer_list_id))
     done
   }
 }
@@ -225,7 +225,7 @@ entry update_transfer_list (
 
 getter get_user (user : address) : option<nat> {
   var res = none<nat>;
-  const user_id ?= call_view<option<nat>>(users, "get_user_id", user);
+  const user_id ?= call_view<option<nat>>(storage, "get_user_id", user);
   match user_id with
   | some optv -> res := some(optv)
   | none -> fail(USER_GETOPT_INTERNAL_ERROR)
@@ -235,7 +235,7 @@ getter get_user (user : address) : option<nat> {
 
 view assert_transfer (sender : address, %from : address, %to : address) : string {
   var res : string = "";
-  const from_query ?= call_view<option<nat>>(users, "get_user_id", %from) : FROM_RESTRICTED;
+  const from_query ?= call_view<option<nat>>(storage, "get_user_id", %from) : FROM_RESTRICTED;
   const from_user_id ?= from_query : FROM_RESTRICTED;
   const from_user ?= transfer_lists[from_user_id] : FROM_RESTRICTED;
   const is_from_restricted = not from_user.unrestricted;
@@ -243,7 +243,7 @@ view assert_transfer (sender : address, %from : address, %to : address) : string
   if is_from_restricted then
     res := FROM_RESTRICTED
   else begin
-    const to_query ?= call_view<option<nat>>(users, "get_user_id", %to) : TO_RESTRICTED;
+    const to_query ?= call_view<option<nat>>(storage, "get_user_id", %to) : TO_RESTRICTED;
     const to_user_id ?= to_query : TO_RESTRICTED;
     const to_user ?= transfer_lists[to_user_id] : TO_RESTRICTED;
     const is_to_restricted = not to_user.unrestricted;

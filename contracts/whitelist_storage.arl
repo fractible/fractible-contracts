@@ -1,4 +1,4 @@
-archetype users_storage(admin : address)
+archetype whitelist_storage(admin : address)
 with metadata ""
 
 constant MISSING_ADMIN_CANDIDATE  : string = "MISSING_ADMIN_CANDIDATE"

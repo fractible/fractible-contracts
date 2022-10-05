@@ -50,8 +50,8 @@ const add_super_user_arg_to_mich = (su: att.Address): att.Micheline => {
 const remove_super_user_arg_to_mich = (su: att.Address): att.Micheline => {
     return su.to_mich();
 }
-const set_users_contract_arg_to_mich = (users_contract: att.Address): att.Micheline => {
-    return users_contract.to_mich();
+const set_storage_contract_arg_to_mich = (storage_contract: att.Address): att.Micheline => {
+    return storage_contract.to_mich();
 }
 const add_whitelister_arg_to_mich = (v: att.Address): att.Micheline => {
     return v.to_mich();
@@ -134,10 +134,10 @@ export class Whitelist {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(admin: att.Address, users: att.Address, params: Partial<ex.Parameters>) {
+    async deploy(admin: att.Address, storage: att.Address, params: Partial<ex.Parameters>) {
         const address = await ex.deploy("./contracts/whitelist.arl", {
             admin: admin.to_mich(),
-            users: users.to_mich()
+            storage: storage.to_mich()
         }, params);
         this.address = address;
         this.get_user_callback_address = await deploy_get_user_callback();
@@ -178,9 +178,9 @@ export class Whitelist {
         }
         throw new Error("Contract not initialised");
     }
-    async set_users_contract(users_contract: att.Address, params: Partial<ex.Parameters>): Promise<any> {
+    async set_storage_contract(storage_contract: att.Address, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
-            return await ex.call(this.address, "set_users_contract", set_users_contract_arg_to_mich(users_contract), params);
+            return await ex.call(this.address, "set_storage_contract", set_storage_contract_arg_to_mich(storage_contract), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -277,9 +277,9 @@ export class Whitelist {
         }
         throw new Error("Contract not initialised");
     }
-    async get_set_users_contract_param(users_contract: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+    async get_set_storage_contract_param(storage_contract: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "set_users_contract", set_users_contract_arg_to_mich(users_contract), params);
+            return await ex.get_call_param(this.address, "set_storage_contract", set_storage_contract_arg_to_mich(storage_contract), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -371,10 +371,10 @@ export class Whitelist {
         }
         throw new Error("Contract not initialised");
     }
-    async get_users(): Promise<att.Address> {
+    async get_storage(): Promise<att.Address> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            return new att.Address(storage.users);
+            return new att.Address(storage.storage);
         }
         throw new Error("Contract not initialised");
     }
