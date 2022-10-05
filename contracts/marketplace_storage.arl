@@ -67,8 +67,8 @@ record sale {
   sale_start: option<date>;
   sale_end: option<date>;
   sale_version: nat;
-  sale_data_type  : bytes;
-  sale_data       : bytes;
+  sale_data_type  : option<bytes>;
+  sale_data       : option<bytes>;
 }
 
 asset sales identified by sale_id {

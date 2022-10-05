@@ -30,7 +30,7 @@ export const mich_to_authorization_op = (m: any): authorization_op => {
     throw new Error("mich_toauthorization_op : complex enum not supported yet");
 };
 export class sale implements att.ArchetypeType {
-    constructor(public sale_contract: att.Address, public sale_token_id: att.Nat, public sale_seller: att.Address, public sale_price_per_item: att.Nat, public sale_qty: att.Nat, public sale_start: att.Option<Date>, public sale_end: att.Option<Date>, public sale_version: att.Nat, public sale_data_type: att.Bytes, public sale_data: att.Bytes) { }
+    constructor(public sale_contract: att.Address, public sale_token_id: att.Nat, public sale_seller: att.Address, public sale_price_per_item: att.Nat, public sale_qty: att.Nat, public sale_start: att.Option<Date>, public sale_end: att.Option<Date>, public sale_version: att.Nat, public sale_data_type: att.Option<att.Bytes>, public sale_data: att.Option<att.Bytes>) { }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -58,8 +58,8 @@ export const sale_mich_type: att.MichelineType = att.pair_array_to_mich_type([
                             att.pair_array_to_mich_type([
                                 att.prim_annot_to_mich_type("nat", ["%sale_version"]),
                                 att.pair_array_to_mich_type([
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data_type"]),
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data"])
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data_type"]),
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data"])
                                 ], [])
                             ], [])
                         ], [])
@@ -77,7 +77,7 @@ export const mich_to_sale = (v: att.Micheline, collapsed: boolean = false): sale
     else {
         fields = att.annotated_mich_to_array(v, sale_mich_type);
     }
-    return new sale(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_address(fields[2]), att.mich_to_nat(fields[3]), att.mich_to_nat(fields[4]), att.mich_to_option(fields[5], x => { return att.mich_to_date(x); }), att.mich_to_option(fields[6], x => { return att.mich_to_date(x); }), att.mich_to_nat(fields[7]), att.mich_to_bytes(fields[8]), att.mich_to_bytes(fields[9]));
+    return new sale(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_address(fields[2]), att.mich_to_nat(fields[3]), att.mich_to_nat(fields[4]), att.mich_to_option(fields[5], x => { return att.mich_to_date(x); }), att.mich_to_option(fields[6], x => { return att.mich_to_date(x); }), att.mich_to_nat(fields[7]), att.mich_to_option(fields[8], x => { return att.mich_to_bytes(x); }), att.mich_to_option(fields[9], x => { return att.mich_to_bytes(x); }));
 };
 export type authorised_key = att.Address;
 export type sales_key = att.Nat;
@@ -101,8 +101,8 @@ export const sales_value_mich_type: att.MichelineType = att.pair_array_to_mich_t
                             att.pair_array_to_mich_type([
                                 att.prim_annot_to_mich_type("nat", ["%sale_version"]),
                                 att.pair_array_to_mich_type([
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data_type"]),
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data"])
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data_type"]),
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data"])
                                 ], [])
                             ], [])
                         ], [])
@@ -138,8 +138,8 @@ export const sales_container_mich_type: att.MichelineType = att.pair_to_mich_typ
                             att.pair_array_to_mich_type([
                                 att.prim_annot_to_mich_type("nat", ["%sale_version"]),
                                 att.pair_array_to_mich_type([
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data_type"]),
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data"])
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data_type"]),
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data"])
                                 ], [])
                             ], [])
                         ], [])
@@ -329,7 +329,7 @@ export class Marketplace_storage {
     async view_get_sale(gs_sale_id: att.Nat, params: Partial<ex.Parameters>): Promise<att.Option<sale>> {
         if (this.address != undefined) {
             const mich = await ex.exec_view(this.get_address(), "get_sale", view_get_sale_arg_to_mich(gs_sale_id), params);
-            return new att.Option<sale>(mich == null ? null : (x => { return new sale((x => { return new att.Address(x); })(x.sale_contract), (x => { return new att.Nat(x); })(x.sale_token_id), (x => { return new att.Address(x); })(x.sale_seller), (x => { return new att.Nat(x); })(x.sale_price_per_item), (x => { return new att.Nat(x); })(x.sale_qty), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_start), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_end), (x => { return new att.Nat(x); })(x.sale_version), (x => { return new att.Bytes(x); })(x.sale_data_type), (x => { return new att.Bytes(x); })(x.sale_data)); })(mich));
+            return new att.Option<sale>(mich == null ? null : (x => { return new sale((x => { return new att.Address(x); })(x.sale_contract), (x => { return new att.Nat(x); })(x.sale_token_id), (x => { return new att.Address(x); })(x.sale_seller), (x => { return new att.Nat(x); })(x.sale_price_per_item), (x => { return new att.Nat(x); })(x.sale_qty), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_start), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_end), (x => { return new att.Nat(x); })(x.sale_version), (x => { return new att.Option<att.Bytes>(x == null ? null : (x => { return new att.Bytes(x); })(x)); })(x.sale_data_type), (x => { return new att.Option<att.Bytes>(x == null ? null : (x => { return new att.Bytes(x); })(x)); })(x.sale_data)); })(mich));
         }
         throw new Error("Contract not initialised");
     }
@@ -373,7 +373,7 @@ export class Marketplace_storage {
                 sale
             ]> = [];
             for (let e of storage.sales.entries()) {
-                res.push([(x => { return new att.Nat(x); })(e[0]), (x => { return new sale((x => { return new att.Address(x); })(x.sale_contract), (x => { return new att.Nat(x); })(x.sale_token_id), (x => { return new att.Address(x); })(x.sale_seller), (x => { return new att.Nat(x); })(x.sale_price_per_item), (x => { return new att.Nat(x); })(x.sale_qty), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_start), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_end), (x => { return new att.Nat(x); })(x.sale_version), (x => { return new att.Bytes(x); })(x.sale_data_type), (x => { return new att.Bytes(x); })(x.sale_data)); })(e[1])]);
+                res.push([(x => { return new att.Nat(x); })(e[0]), (x => { return new sale((x => { return new att.Address(x); })(x.sale_contract), (x => { return new att.Nat(x); })(x.sale_token_id), (x => { return new att.Address(x); })(x.sale_seller), (x => { return new att.Nat(x); })(x.sale_price_per_item), (x => { return new att.Nat(x); })(x.sale_qty), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_start), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_end), (x => { return new att.Nat(x); })(x.sale_version), (x => { return new att.Option<att.Bytes>(x == null ? null : (x => { return new att.Bytes(x); })(x)); })(x.sale_data_type), (x => { return new att.Option<att.Bytes>(x == null ? null : (x => { return new att.Bytes(x); })(x)); })(x.sale_data)); })(e[1])]);
             }
             return res;
         }

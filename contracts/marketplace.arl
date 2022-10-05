@@ -122,8 +122,8 @@ record sale {
   sale_start: option<date>;
   sale_end: option<date>;
   sale_version: nat;
-  sale_data_type  : bytes;
-  sale_data       : bytes;
+  sale_data_type  : option<bytes>;
+  sale_data       : option<bytes>;
 }
 
 entry sell (
@@ -169,7 +169,7 @@ entry buy(
       buyer_address is key_to_address(b_buyer_pubk);
     }
     require {
-      buy_incorrect_qty: b_param.buy_qty > 0 and b_param.buy_qty >= stored_sale_stock;
+      buy_incorrect_qty: b_param.buy_qty > 0 and b_param.buy_qty <= stored_sale_stock;
     }
     effect {
       var packed_data = pack((b_param.buy_sale_id, b_param.buy_qty));
@@ -271,5 +271,3 @@ function get_balance_for_token(gbft_contract: address, gbft_request: balance_of_
         gbft_request
     ) ? the : none<nat>)
 }
-
-entry default() {}

@@ -78,7 +78,7 @@ export class balance_of_request implements att.ArchetypeType {
     }
 }
 export class sale implements att.ArchetypeType {
-    constructor(public sale_contract: att.Address, public sale_token_id: att.Nat, public sale_seller: att.Address, public sale_price_per_item: att.Nat, public sale_qty: att.Nat, public sale_start: att.Option<Date>, public sale_end: att.Option<Date>, public sale_version: att.Nat, public sale_data_type: att.Bytes, public sale_data: att.Bytes) { }
+    constructor(public sale_contract: att.Address, public sale_token_id: att.Nat, public sale_seller: att.Address, public sale_price_per_item: att.Nat, public sale_qty: att.Nat, public sale_start: att.Option<Date>, public sale_end: att.Option<Date>, public sale_version: att.Nat, public sale_data_type: att.Option<att.Bytes>, public sale_data: att.Option<att.Bytes>) { }
     toString(): string {
         return JSON.stringify(this, null, 2);
     }
@@ -128,8 +128,8 @@ export const sale_mich_type: att.MichelineType = att.pair_array_to_mich_type([
                             att.pair_array_to_mich_type([
                                 att.prim_annot_to_mich_type("nat", ["%sale_version"]),
                                 att.pair_array_to_mich_type([
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data_type"]),
-                                    att.prim_annot_to_mich_type("bytes", ["%sale_data"])
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data_type"]),
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data"])
                                 ], [])
                             ], [])
                         ], [])
@@ -187,7 +187,7 @@ export const mich_to_sale = (v: att.Micheline, collapsed: boolean = false): sale
     else {
         fields = att.annotated_mich_to_array(v, sale_mich_type);
     }
-    return new sale(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_address(fields[2]), att.mich_to_nat(fields[3]), att.mich_to_nat(fields[4]), att.mich_to_option(fields[5], x => { return att.mich_to_date(x); }), att.mich_to_option(fields[6], x => { return att.mich_to_date(x); }), att.mich_to_nat(fields[7]), att.mich_to_bytes(fields[8]), att.mich_to_bytes(fields[9]));
+    return new sale(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_address(fields[2]), att.mich_to_nat(fields[3]), att.mich_to_nat(fields[4]), att.mich_to_option(fields[5], x => { return att.mich_to_date(x); }), att.mich_to_option(fields[6], x => { return att.mich_to_date(x); }), att.mich_to_nat(fields[7]), att.mich_to_option(fields[8], x => { return att.mich_to_bytes(x); }), att.mich_to_option(fields[9], x => { return att.mich_to_bytes(x); }));
 };
 export type authorizations_key = att.Address;
 export const authorizations_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
@@ -229,9 +229,6 @@ const cancel_sale_arg_to_mich = (cs_sale_id: att.Nat, cs_seller_pubk: att.Key, c
         cs_seller_pubk.to_mich(),
         cs_sig.to_mich()
     ]);
-}
-const default_arg_to_mich = (): att.Micheline => {
-    return att.unit_mich;
 }
 export class Marketplace {
     address: string | undefined;
@@ -304,12 +301,6 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
-    async default(params: Partial<ex.Parameters>): Promise<any> {
-        if (this.address != undefined) {
-            return await ex.call(this.address, "default", default_arg_to_mich(), params);
-        }
-        throw new Error("Contract not initialised");
-    }
     async get_declare_ownership_param(candidate: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "declare_ownership", declare_ownership_arg_to_mich(candidate), params);
@@ -355,12 +346,6 @@ export class Marketplace {
     async get_cancel_sale_param(cs_sale_id: att.Nat, cs_seller_pubk: att.Key, cs_sig: att.Signature, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "cancel_sale", cancel_sale_arg_to_mich(cs_sale_id, cs_seller_pubk, cs_sig), params);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async get_default_param(params: Partial<ex.Parameters>): Promise<att.CallParameter> {
-        if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "default", default_arg_to_mich(), params);
         }
         throw new Error("Contract not initialised");
     }

@@ -54,7 +54,7 @@ const user4 = get_account("bootstrap4");
 
 /* Endpoint ---------------------------------------------------------------- */
 
-set_mockup()
+//set_mockup()
 
 /* Verbose mode ------------------------------------------------------------ */
 
@@ -138,7 +138,8 @@ describe("Set up", async () => {
 					[bob.get_address(), Option.Some<Nat>(new Nat(0))],
 					[admin.get_address(), Option.Some<Nat>(new Nat(0))]
 				], {as: alice}),
-				await nft.get_set_marketplace_param(marketplace_storage.get_address(), {as: alice}),
+				await nft.get_set_marketplace_param(marketplace.get_address(), {as: alice}),
+				await nft.get_set_marketplace_storage_param(marketplace_storage.get_address(), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(nft.get_address()), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(marketplace.get_address()), {as: alice})
 			],
@@ -177,8 +178,8 @@ describe("Marketplace tests", async () => {
 			Option.None(),
 			Option.None(),
 			new Nat(0),
-			new Bytes(""),
-			new Bytes("")
+			Option.None(),
+			Option.None()
 		)
 		const permit = await permits.get_permits_value(alice.get_address())
 		const counter = permit?.counter
