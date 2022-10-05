@@ -1,6 +1,7 @@
 @startuml
 package "Tezos" {
-  NODE_HTTP - [Blockchain node]
+  [Wallet]
+  [Blockchain node] - NODE_HTTP
   database "Blockchain" {
     frame "Smart contracts" {
        [Marketplace contract]
@@ -32,10 +33,12 @@ cloud "HSM Cloud" {
 
 [Fractible backend] --> PKCS11
 [Fractible frontend] --> [Fractible backend]
-[Fractible backend] --> NODE_HTTP
+[Fractible backend] --> [TZKT Indexer]
+[Fractible backend] --> [Blockchain node]
 [Fractible backend] --> [Fractible indexer (DipDup)]
-
-[Fractible indexer (DipDup)] --> TZKT_HTTP
-[Fractible indexer (DipDup)] --> TZKT_WS
+[Fractible frontend] --> [Wallet]
+[TZKT Indexer] --> [Blockchain node]
+[Wallet] --> [Blockchain node]
+[Fractible indexer (DipDup)] --> [TZKT Indexer]
 [Blockchain node] --> Blockchain
 @enduml
