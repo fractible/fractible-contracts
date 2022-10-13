@@ -167,6 +167,9 @@ const check_arg_to_mich = (signer: att.Key, sig: att.Signature, data: att.Bytes)
 }
 export class Permits {
     address: string | undefined;
+    constructor(address: string | undefined = undefined) {
+        this.address = address;
+    }
     get_address(): att.Address {
         if (undefined != this.address) {
             return new att.Address(this.address);

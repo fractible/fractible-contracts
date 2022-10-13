@@ -576,6 +576,9 @@ export const deploy_balance_of_callback = async (): Promise<string> => {
 };
 export class Nft {
     address: string | undefined;
+    constructor(address: string | undefined = undefined) {
+        this.address = address;
+    }
     balance_of_callback_address: string | undefined;
     get_address(): att.Address {
         if (undefined != this.address) {

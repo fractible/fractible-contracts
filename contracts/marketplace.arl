@@ -153,6 +153,8 @@ entry sell (
       var packed_data = pack(s_sale);
       transfer 0tz to permits call check<key * signature * bytes>((s_seller_pubk, s_sig, packed_data));
 
+      s_sale.sale_start := some(start_date);
+
       sales.add_update(
         id_sequence,
         {

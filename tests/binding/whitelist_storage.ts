@@ -39,6 +39,9 @@ const view_get_user_id_arg_to_mich = (k: att.Address): att.Micheline => {
 }
 export class Whitelist_storage {
     address: string | undefined;
+    constructor(address: string | undefined = undefined) {
+        this.address = address;
+    }
     get_address(): att.Address {
         if (undefined != this.address) {
             return new att.Address(this.address);

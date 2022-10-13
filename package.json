@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@completium/archetype-ts-types": "0.0.5",
-    "@completium/completium-cli": "^0.4.28",
+    "@completium/completium-cli": "^0.4.35",
     "@completium/experiment-ts": "0.0.85",
     "@types/node": "latest",
     "mocha": "^10.0.0"

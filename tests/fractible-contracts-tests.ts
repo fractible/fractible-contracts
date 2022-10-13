@@ -31,7 +31,6 @@ import {
 	sale_mich_type,
 	marketplace
 } from "./binding/marketplace";
-import {add as add_sales_storage, marketplace_storage} from "./binding/marketplace_storage";
 import {whitelist_storage} from "./binding/whitelist_storage";
 import {whitelist} from "./binding/whitelist";
 import {
@@ -54,11 +53,11 @@ const user4 = get_account("bootstrap4");
 
 /* Endpoint ---------------------------------------------------------------- */
 
-set_mockup()
+//set_mockup()
 
 /* Verbose mode ------------------------------------------------------------ */
 
-set_quiet(false);
+set_quiet(true);
 
 /* Now --------------------------------------------------------------------- */
 
@@ -84,10 +83,10 @@ const get_permit_data = (ptps: Bytes, contract: Address, permit_counter: Nat | u
 	}
 
 	//mockup / sandbox
-	const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
+	//const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
 
 	//testnet
-	//const chain_id = "NetXnHfVqm9iesp"
+	const chain_id = "NetXnHfVqm9iesp"
 	const permit_data = mich_array_to_mich([
 		mich_array_to_mich([contract.to_mich(), string_to_mich(chain_id)]),
 		mich_array_to_mich([counter.to_mich(), ptps.to_mich()])

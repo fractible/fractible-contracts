@@ -307,6 +307,9 @@ const remove_sales_arg_to_mich = (rcs_sale_ids: Array<att.Nat>): att.Micheline =
 }
 export class Marketplace {
     address: string | undefined;
+    constructor(address: string | undefined = undefined) {
+        this.address = address;
+    }
     get_address(): att.Address {
         if (undefined != this.address) {
             return new att.Address(this.address);

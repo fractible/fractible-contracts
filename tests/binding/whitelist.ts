@@ -121,6 +121,9 @@ export const deploy_get_user_callback = async (): Promise<string> => {
 };
 export class Whitelist {
     address: string | undefined;
+    constructor(address: string | undefined = undefined) {
+        this.address = address;
+    }
     get_user_callback_address: string | undefined;
     get_address(): att.Address {
         if (undefined != this.address) {
