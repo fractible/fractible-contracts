@@ -82,7 +82,12 @@ const get_permit_data = (ptps: Bytes, contract: Address, permit_counter: Nat | u
 	if (permit_counter != undefined) {
 		counter = permit_counter
 	}
-	const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
+
+	//mockup / sandbox
+	//const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
+
+	//testnet
+	const chain_id = "NetXnHfVqm9iesp"
 	const permit_data = mich_array_to_mich([
 		mich_array_to_mich([contract.to_mich(), string_to_mich(chain_id)]),
 		mich_array_to_mich([counter.to_mich(), ptps.to_mich()])

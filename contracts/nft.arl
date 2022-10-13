@@ -268,10 +268,15 @@ entry update_operator_for_all_gasless (upfa_operator : update_for_all_param, upf
 }
 
 
-record gasless_param {
+record transfer_gasless_param {
   transfer_params : list<transfer_param>;
   user_pk         : key;
   user_sig        : signature
+}
+
+record burn_gasless_param {
+  burn_token_id : nat;
+  burn_amount : nat;
 }
 
 function check_owner(co_addr : address, co_txs : list<transfer_param>) : bool {
@@ -282,7 +287,7 @@ function check_owner(co_addr : address, co_txs : list<transfer_param>) : bool {
   return res
 }
 
-entry transfer_gasless (batch : list<gasless_param>) {
+entry transfer_gasless (batch : list<transfer_gasless_param>) {
   require { fa2_r3 : is_not_paused() }
   effect {
     for b in batch do
@@ -383,6 +388,26 @@ entry burn(tid : nat, nbt : nat) {
     else begin
       ledger.remove((caller, tid));
       token_metadata.remove(tid)
+    end
+  }
+}
+
+entry burn_gasless(b_params: burn_gasless_param, owner_pubk: key, owner_sig: signature) {
+  constant {
+    signer is key_to_address(owner_pubk);
+    amount ?is ledger[(signer, b_params.burn_token_id)]?.ledger_token_amount otherwise FA2_INSUFFICIENT_BALANCE
+  }
+  require {
+    fa2_r66: is_not_paused();
+    fa2_r77: amount >= b_params.burn_amount otherwise FA2_INSUFFICIENT_BALANCE
+  }
+  effect {
+    transfer 0tz to permits call check<key * signature * bytes>((owner_pubk, owner_sig, pack(b_params)));
+    if (amount > b_params.burn_amount) then
+      ledger.update((signer, b_params.burn_token_id), { ledger_token_amount -= b_params.burn_amount })
+    else begin
+      ledger.remove((signer, b_params.burn_token_id));
+      token_metadata.remove(b_params.burn_token_id)
     end
   }
 }
