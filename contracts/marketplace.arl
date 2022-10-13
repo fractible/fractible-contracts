@@ -1,6 +1,5 @@
 archetype marketplace(
     owner: address,
-    marketplace_storage: address,
     permits: address,
     signer: key,
 )
@@ -25,6 +24,8 @@ constant SALE_ALREADY_EXISTS     : string = "SALE_ALREADY_EXISTS"
 constant SALE_CLOSED             : string = "SALE_CLOSED"
 constant SALE_NOT_STARTED        : string = "SALE_NOT_STARTED"
 constant WRONG_XTZ_PAYLOAD       : string = "WRONG_XTZ_PAYLOAD"
+
+variable id_sequence : nat = 0
 
 //----------------------------------------------------------------------------
 // Owner role transfer
@@ -56,13 +57,6 @@ entry claim_ownership() {
 //----------------------------------------------------------------------------
 // Admin
 //----------------------------------------------------------------------------
-entry set_marketplace_storage_contract(smsc_contract : address) {
-  called by owner
-  effect {
-    marketplace_storage := smsc_contract;
-  }
-}
-
 entry set_permits(sp_contract : address) {
   called by owner
   effect {
@@ -71,23 +65,24 @@ entry set_permits(sp_contract : address) {
 }
 
 /* Authorized ------------------------------------------------------------ */
-asset authorizations {
+asset authorised {
   authorization : address
 }
 
-enum authorization_op =
+enum authorisation_op =
 | add<address>
 | remove<address>
 
-entry manage_authorization(op : authorization_op) {
+entry manage_authorisation(op : authorisation_op) {
   called by owner
   effect {
     match op with
-    | add(a)    -> authorizations.add({ a })
-    | remove(a) -> authorizations.remove(a)
+    | add(a)    -> authorised.add({ a })
+    | remove(a) -> authorised.remove(a)
     end
   }
 }
+
 
 //----------------------------------------------------------------------------
 // Types
@@ -126,6 +121,11 @@ record sale {
   sale_data       : option<bytes>;
 }
 
+asset sales identified by sale_id {
+  sale_id : nat;
+  sale_record: sale;
+}
+
 entry sell (
   s_sale : sale,
   s_seller_pubk: key,
@@ -142,8 +142,6 @@ entry sell (
       insufficient_balance: user_balance > s_sale.sale_qty;
     }
     effect {
-      var packed_data = pack(s_sale);
-      transfer 0tz to permits call check<key * signature * bytes>((s_seller_pubk, s_sig, packed_data));
       match s_sale.sale_end with
       | some(end_date) -> begin
         do_require(end_date > now, "SALE_END_IN_THE_PAST");
@@ -151,7 +149,17 @@ entry sell (
       end
       | none -> ()
       end;
-      transfer 0tz to marketplace_storage call set_sale<sale>(s_sale);
+
+      var packed_data = pack(s_sale);
+      transfer 0tz to permits call check<key * signature * bytes>((s_seller_pubk, s_sig, packed_data));
+
+      sales.add_update(
+        id_sequence,
+        {
+          sale_record = s_sale
+        }
+      );
+      id_sequence := id_sequence + 1;
     }
 }
 
@@ -210,14 +218,14 @@ entry buy(
       );
 
       if(b_param.buy_qty = stored_sale_stock) then (
-        transfer 0tz to marketplace_storage call remove_sale<nat>(b_param.buy_sale_id)
+        sales.remove(b_param.buy_sale_id);
       ) else (
         stored_sale.sale_qty := abs(stored_sale.sale_qty - b_param.buy_qty);
-        transfer 0tz to marketplace_storage call update_sale<nat * sale>(
-          (
-            b_param.buy_sale_id,
-            stored_sale
-          )
+        sales.add_update(
+          b_param.buy_sale_id,
+          {
+            sale_record = stored_sale
+          }
         );
       )
     }
@@ -239,29 +247,52 @@ entry cancel_sale(
     effect {
       var packed_data = pack(cs_sale_id);
       transfer 0tz to permits call check<key * signature * bytes>((cs_seller_pubk, cs_sig, packed_data));
-      transfer 0tz to marketplace_storage call remove_sale<nat>(cs_sale_id)
+      sales.remove(cs_sale_id);
     }
 }
 
+entry cancel_matching_orders(
+  cmo_contract: address,
+  cmo_token_id: nat,
+  cmo_owner: address,
+  ) {
+  called by authorised or self_address
+  constant{
+    matching_orders is sales.select(
+      sale_record.sale_contract = cmo_contract
+      and sale_record.sale_token_id = cmo_token_id
+      and sale_record.sale_seller = cmo_owner
+    );
+  }
+  effect {
+    for matching_sale_id in matching_orders do
+      do_require(sales[matching_sale_id].sale_record.sale_contract = caller, "INVALID_CALLER");
+      sales.remove(matching_sale_id)
+    done
+  }
+}
+
+entry remove_sales(
+  rcs_sale_ids: list<nat>) {
+  called by authorised or self_address
+  constant{
+    selected_sales is sales.select(rcs_sale_ids.contains(the.sale_id));
+  }
+  effect {
+    for selected_sale_id in selected_sales do
+      do_require(sales[selected_sale_id].sale_record.sale_contract = caller, "INVALID_CALLER");
+      sales.remove(selected_sale_id)
+    done
+  }
+}
+
 function sale_exists(se_sale_id: nat) : bool {
-    return match call_view<bool>(
-        marketplace_storage,
-        "sale_exists",
-        se_sale_id
-    )
-    with
-        | some(v) -> v
-        | none -> false
-    end
+    return sales.contains(se_sale_id)
 }
 
 
 function get_sale(gs_sale_id: nat) : option<sale> {
-    return (call_view<option<sale>>(
-        marketplace_storage,
-        "get_sale",
-        gs_sale_id
-    ) ? the : none<sale>)
+  return sales[gs_sale_id]?.sale_record
 }
 
 function get_balance_for_token(gbft_contract: address, gbft_request: balance_of_request) : option<nat> {

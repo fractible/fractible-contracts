@@ -94,7 +94,7 @@ export class update_for_all_param implements att.ArchetypeType {
         return (this.upfa_op_type == v.upfa_op_type && this.upfa_op_type == v.upfa_op_type && this.upfa_op.equals(v.upfa_op));
     }
 }
-export class gasless_param implements att.ArchetypeType {
+export class transfer_gasless_param implements att.ArchetypeType {
     constructor(public transfer_params: Array<transfer_param>, public user_pk: att.Key, public user_sig: att.Signature) { }
     toString(): string {
         return JSON.stringify(this, null, 2);
@@ -104,8 +104,20 @@ export class gasless_param implements att.ArchetypeType {
                 return x.to_mich();
             }), att.pair_to_mich([this.user_pk.to_mich(), this.user_sig.to_mich()])]);
     }
-    equals(v: gasless_param): boolean {
+    equals(v: transfer_gasless_param): boolean {
         return (JSON.stringify(this.transfer_params) == JSON.stringify(v.transfer_params) && JSON.stringify(this.transfer_params) == JSON.stringify(v.transfer_params) && this.user_pk.equals(v.user_pk) && this.user_sig.equals(v.user_sig));
+    }
+}
+export class burn_gasless_param implements att.ArchetypeType {
+    constructor(public burn_token_id: att.Nat, public burn_amount: att.Nat) { }
+    toString(): string {
+        return JSON.stringify(this, null, 2);
+    }
+    to_mich(): att.Micheline {
+        return att.pair_to_mich([this.burn_token_id.to_mich(), this.burn_amount.to_mich()]);
+    }
+    equals(v: burn_gasless_param): boolean {
+        return (this.burn_token_id.equals(v.burn_token_id) && this.burn_token_id.equals(v.burn_token_id) && this.burn_amount.equals(v.burn_amount));
     }
 }
 export class balance_of_request implements att.ArchetypeType {
@@ -164,7 +176,7 @@ export const update_for_all_param_mich_type: att.MichelineType = att.pair_array_
     att.prim_annot_to_mich_type("int", ["%upfa_op_type"]),
     att.prim_annot_to_mich_type("address", ["%upfa_op"])
 ], []);
-export const gasless_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
+export const transfer_gasless_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
     att.list_annot_to_mich_type(att.pair_array_to_mich_type([
         att.prim_annot_to_mich_type("address", ["%from_"]),
         att.list_annot_to_mich_type(att.pair_array_to_mich_type([
@@ -179,6 +191,10 @@ export const gasless_param_mich_type: att.MichelineType = att.pair_array_to_mich
         att.prim_annot_to_mich_type("key", ["%user_pk"]),
         att.prim_annot_to_mich_type("signature", ["%user_sig"])
     ], [])
+], []);
+export const burn_gasless_param_mich_type: att.MichelineType = att.pair_array_to_mich_type([
+    att.prim_annot_to_mich_type("nat", ["%burn_token_id"]),
+    att.prim_annot_to_mich_type("nat", ["%burn_amount"])
 ], []);
 export const balance_of_request_mich_type: att.MichelineType = att.pair_array_to_mich_type([
     att.prim_annot_to_mich_type("address", ["%owner"]),
@@ -241,15 +257,25 @@ export const mich_to_update_for_all_param = (v: att.Micheline, collapsed: boolea
     }
     return new update_for_all_param(mich_to_update_for_all_op(fields[0]), att.mich_to_address(fields[1]));
 };
-export const mich_to_gasless_param = (v: att.Micheline, collapsed: boolean = false): gasless_param => {
+export const mich_to_transfer_gasless_param = (v: att.Micheline, collapsed: boolean = false): transfer_gasless_param => {
     let fields: att.Micheline[] = [];
     if (collapsed) {
         fields = att.mich_to_pairs(v);
     }
     else {
-        fields = att.annotated_mich_to_array(v, gasless_param_mich_type);
+        fields = att.annotated_mich_to_array(v, transfer_gasless_param_mich_type);
     }
-    return new gasless_param(att.mich_to_list(fields[0], x => { return mich_to_transfer_param(x, collapsed); }), att.mich_to_key(fields[1]), att.mich_to_signature(fields[2]));
+    return new transfer_gasless_param(att.mich_to_list(fields[0], x => { return mich_to_transfer_param(x, collapsed); }), att.mich_to_key(fields[1]), att.mich_to_signature(fields[2]));
+};
+export const mich_to_burn_gasless_param = (v: att.Micheline, collapsed: boolean = false): burn_gasless_param => {
+    let fields: att.Micheline[] = [];
+    if (collapsed) {
+        fields = att.mich_to_pairs(v);
+    }
+    else {
+        fields = att.annotated_mich_to_array(v, burn_gasless_param_mich_type);
+    }
+    return new burn_gasless_param(att.mich_to_nat(fields[0]), att.mich_to_nat(fields[1]));
 };
 export const mich_to_balance_of_request = (v: att.Micheline, collapsed: boolean = false): balance_of_request => {
     let fields: att.Micheline[] = [];
@@ -448,9 +474,6 @@ const unpause_arg_to_mich = (): att.Micheline => {
 const set_marketplace_arg_to_mich = (sm_marketplace: att.Address): att.Micheline => {
     return sm_marketplace.to_mich();
 }
-const set_marketplace_storage_arg_to_mich = (sms_marketplace: att.Address): att.Micheline => {
-    return sms_marketplace.to_mich();
-}
 const set_metadata_arg_to_mich = (sm_meta_key: string, sm_meta_value: att.Option<att.Bytes>): att.Micheline => {
     return att.pair_to_mich([
         att.string_to_mich(sm_meta_key),
@@ -496,7 +519,7 @@ const update_operator_for_all_gasless_arg_to_mich = (upfa_operator: update_for_a
         upfa_sig.to_mich()
     ]);
 }
-const transfer_gasless_arg_to_mich = (batch: Array<gasless_param>): att.Micheline => {
+const transfer_gasless_arg_to_mich = (batch: Array<transfer_gasless_param>): att.Micheline => {
     return att.list_to_mich(batch, x => {
         return x.to_mich();
     });
@@ -525,6 +548,13 @@ const burn_arg_to_mich = (tid: att.Nat, nbt: att.Nat): att.Micheline => {
     return att.pair_to_mich([
         tid.to_mich(),
         nbt.to_mich()
+    ]);
+}
+const burn_gasless_arg_to_mich = (b_params: burn_gasless_param, owner_pubk: att.Key, owner_sig: att.Signature): att.Micheline => {
+    return att.pair_to_mich([
+        b_params.to_mich(),
+        owner_pubk.to_mich(),
+        owner_sig.to_mich()
     ]);
 }
 const balance_of_arg_to_mich = (requests: Array<balance_of_request>): att.Micheline => {
@@ -559,13 +589,12 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(owner: att.Address, permits: att.Address, whitelist: att.Address, marketplace: att.Address, marketplace_storage: att.Address, params: Partial<ex.Parameters>) {
+    async deploy(owner: att.Address, permits: att.Address, whitelist: att.Address, marketplace: att.Address, params: Partial<ex.Parameters>) {
         const address = await ex.deploy("./contracts/nft.arl", {
             owner: owner.to_mich(),
             permits: permits.to_mich(),
             whitelist: whitelist.to_mich(),
-            marketplace: marketplace.to_mich(),
-            marketplace_storage: marketplace_storage.to_mich()
+            marketplace: marketplace.to_mich()
         }, params);
         this.address = address;
         this.balance_of_callback_address = await deploy_balance_of_callback();
@@ -597,12 +626,6 @@ export class Nft {
     async set_marketplace(sm_marketplace: att.Address, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "set_marketplace", set_marketplace_arg_to_mich(sm_marketplace), params);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async set_marketplace_storage(sms_marketplace: att.Address, params: Partial<ex.Parameters>): Promise<any> {
-        if (this.address != undefined) {
-            return await ex.call(this.address, "set_marketplace_storage", set_marketplace_storage_arg_to_mich(sms_marketplace), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -657,7 +680,7 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
-    async transfer_gasless(batch: Array<gasless_param>, params: Partial<ex.Parameters>): Promise<any> {
+    async transfer_gasless(batch: Array<transfer_gasless_param>, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "transfer_gasless", transfer_gasless_arg_to_mich(batch), params);
         }
@@ -681,6 +704,12 @@ export class Nft {
     async burn(tid: att.Nat, nbt: att.Nat, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "burn", burn_arg_to_mich(tid, nbt), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async burn_gasless(b_params: burn_gasless_param, owner_pubk: att.Key, owner_sig: att.Signature, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "burn_gasless", burn_gasless_arg_to_mich(b_params, owner_pubk, owner_sig), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -711,12 +740,6 @@ export class Nft {
     async get_set_marketplace_param(sm_marketplace: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "set_marketplace", set_marketplace_arg_to_mich(sm_marketplace), params);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async get_set_marketplace_storage_param(sms_marketplace: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
-        if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "set_marketplace_storage", set_marketplace_storage_arg_to_mich(sms_marketplace), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -771,7 +794,7 @@ export class Nft {
         }
         throw new Error("Contract not initialised");
     }
-    async get_transfer_gasless_param(batch: Array<gasless_param>, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+    async get_transfer_gasless_param(batch: Array<transfer_gasless_param>, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "transfer_gasless", transfer_gasless_arg_to_mich(batch), params);
         }
@@ -795,6 +818,12 @@ export class Nft {
     async get_burn_param(tid: att.Nat, nbt: att.Nat, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "burn", burn_arg_to_mich(tid, nbt), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_burn_gasless_param(b_params: burn_gasless_param, owner_pubk: att.Key, owner_sig: att.Signature, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "burn_gasless", burn_gasless_arg_to_mich(b_params, owner_pubk, owner_sig), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -842,13 +871,6 @@ export class Nft {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
             return new att.Address(storage.marketplace);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async get_marketplace_storage(): Promise<att.Address> {
-        if (this.address != undefined) {
-            const storage = await ex.get_storage(this.address);
-            return new att.Address(storage.marketplace_storage);
         }
         throw new Error("Contract not initialised");
     }
@@ -1015,14 +1037,17 @@ export class Nft {
         throw new Error("Contract not initialised");
     }
     errors = {
+        fa2_r77: att.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
+        fa2_r66: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r66\"")]),
+        FA2_INSUFFICIENT_BALANCE: att.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
         fa2_r7: att.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
         fa2_r6: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r6\"")]),
-        FA2_INSUFFICIENT_BALANCE: att.string_to_mich("\"FA2_INSUFFICIENT_BALANCE\""),
         ASSERT_RECEIVER_FAILED: att.string_to_mich("\"ASSERT_RECEIVER_FAILED\""),
         fa2_r5: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r5\"")]),
         INVALID_CALLER: att.string_to_mich("\"INVALID_CALLER\""),
         ASSERT_TRANSFER_FAILED: att.string_to_mich("\"ASSERT_TRANSFER_FAILED\""),
         fa2_r4: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r4\"")]),
+        SIGNER_NOT_FROM: att.string_to_mich("\"SIGNER_NOT_FROM\""),
         fa2_r3: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r3\"")]),
         fa2_r2b: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r2b\"")]),
         fa2_r2: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"fa2_r2\"")]),
@@ -1031,7 +1056,6 @@ export class Nft {
         sp_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"sp_r1\"")]),
         tmd_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"tmd_r1\"")]),
         md_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"md_r1\"")]),
-        sm_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"sm_r1\"")]),
         p_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"p_r1\"")]),
         pausable_r2: att.string_to_mich("\"CONTRACT_NOT_PAUSED\""),
         pausable_r1: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"pausable_r1\"")]),

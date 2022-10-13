@@ -54,11 +54,11 @@ const user4 = get_account("bootstrap4");
 
 /* Endpoint ---------------------------------------------------------------- */
 
-//set_mockup()
+set_mockup()
 
 /* Verbose mode ------------------------------------------------------------ */
 
-set_quiet(true);
+set_quiet(false);
 
 /* Now --------------------------------------------------------------------- */
 
@@ -84,10 +84,10 @@ const get_permit_data = (ptps: Bytes, contract: Address, permit_counter: Nat | u
 	}
 
 	//mockup / sandbox
-	//const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
+	const chain_id = is_mockup() ? 'NetXynUjJNZm7wi' : 'NetXq4AxoF7BoxJ';
 
 	//testnet
-	const chain_id = "NetXnHfVqm9iesp"
+	//const chain_id = "NetXnHfVqm9iesp"
 	const permit_data = mich_array_to_mich([
 		mich_array_to_mich([contract.to_mich(), string_to_mich(chain_id)]),
 		mich_array_to_mich([counter.to_mich(), ptps.to_mich()])
@@ -100,9 +100,6 @@ describe("Contracts deployment", async () => {
 	it("Whitelist storage contract deployment should succeed", async () => {
 		await whitelist_storage.deploy(alice.get_address(), {as: alice});
 	});
-	it("Sales storage contract deployment should succeed", async () => {
-		await marketplace_storage.deploy(alice.get_address(), {as: alice});
-	});
 	it("Whitelist contract deployment should succeed", async () => {
 		await whitelist.deploy(alice.get_address(), whitelist_storage.get_address(), {as: alice});
 	});
@@ -111,7 +108,6 @@ describe("Contracts deployment", async () => {
 	});
 	it("Sales contract deployment should succeed", async () => {
 		await marketplace.deploy(alice.get_address(),
-			marketplace_storage.get_address(),
 			permits.get_address(),
 			admin.get_public_key(),
 			{as: alice});
@@ -121,7 +117,6 @@ describe("Contracts deployment", async () => {
 			permits.get_address(),
 			whitelist.get_address(),
 			marketplace.get_address(),
-			marketplace_storage.get_address(),
 			{as: alice});
 	});
 });
@@ -135,16 +130,12 @@ describe("Set up", async () => {
 				await whitelist_storage.get_add_whitelister_param(whitelist.get_address(), {as: alice}),
 				await whitelist.get_add_whitelister_param(alice.get_address(), {as: alice}),
 				await whitelist.get_add_super_user_param(alice.get_address(), {as: alice}),
-				await marketplace.get_manage_authorization_param(new add_sales(alice.get_address()), {as: alice}),
-				await marketplace_storage.get_manage_authorization_param(new add_sales_storage(marketplace.get_address()), {as: alice}),
-				await marketplace_storage.get_manage_authorization_param(new add_sales_storage(nft.get_address()), {as: alice}),
 				await whitelist.get_update_users_param([
 					[alice.get_address(), Option.Some<Nat>(new Nat(0))],
 					[bob.get_address(), Option.Some<Nat>(new Nat(0))],
 					[admin.get_address(), Option.Some<Nat>(new Nat(0))]
 				], {as: alice}),
 				await nft.get_set_marketplace_param(marketplace.get_address(), {as: alice}),
-				await nft.get_set_marketplace_storage_param(marketplace_storage.get_address(), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(nft.get_address()), {as: alice}),
 				await permits.get_manage_consumer_param(new add_permit(marketplace.get_address()), {as: alice})
 			],
@@ -168,7 +159,7 @@ describe("Set up", async () => {
 describe("Minting", async () => {
 	it("Mint NFT", async () => {
 		await nft.mint([new mint_param(alice.get_address(), new Nat(10)), new mint_param(bob.get_address(),
-			new Nat(10)), new mint_param(admin.get_address(), new Nat(10))], [], {as: alice});
+			new Nat(10)), new mint_param(admin.get_address(), new Nat(10))], [["", Bytes.hex_encode("ipfs://QmQ4x5BR7ecGVjyhZ7o87m2rPgzp8sBzxFbM4gtHiQQ6ay")]], {as: alice});
 	});
 });
 

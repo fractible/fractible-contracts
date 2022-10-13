@@ -1,14 +1,14 @@
 import * as ex from "@completium/experiment-ts";
 import * as att from "@completium/archetype-ts-types";
-export enum authorization_op_types {
+export enum authorisation_op_types {
     add = "add",
     remove = "remove"
 }
-export abstract class authorization_op extends att.Enum<authorization_op_types> {
+export abstract class authorisation_op extends att.Enum<authorisation_op_types> {
 }
-export class add extends authorization_op {
+export class add extends authorisation_op {
     constructor(private content: att.Address) {
-        super(authorization_op_types.add);
+        super(authorisation_op_types.add);
     }
     to_mich() { return att.left_to_mich(this.content.to_mich()); }
     toString(): string {
@@ -16,9 +16,9 @@ export class add extends authorization_op {
     }
     get() { return this.content; }
 }
-export class remove extends authorization_op {
+export class remove extends authorisation_op {
     constructor(private content: att.Address) {
-        super(authorization_op_types.remove);
+        super(authorisation_op_types.remove);
     }
     to_mich() { return att.right_to_mich(att.left_to_mich(this.content.to_mich())); }
     toString(): string {
@@ -26,8 +26,8 @@ export class remove extends authorization_op {
     }
     get() { return this.content; }
 }
-export const mich_to_authorization_op = (m: any): authorization_op => {
-    throw new Error("mich_toauthorization_op : complex enum not supported yet");
+export const mich_to_authorisation_op = (m: any): authorisation_op => {
+    throw new Error("mich_toauthorisation_op : complex enum not supported yet");
 };
 export class transfer_param implements att.ArchetypeType {
     constructor(public destination_address: att.Address, public token_id: att.Nat, public token_amount: att.Nat) { }
@@ -189,23 +189,86 @@ export const mich_to_sale = (v: att.Micheline, collapsed: boolean = false): sale
     }
     return new sale(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_address(fields[2]), att.mich_to_nat(fields[3]), att.mich_to_nat(fields[4]), att.mich_to_option(fields[5], x => { return att.mich_to_date(x); }), att.mich_to_option(fields[6], x => { return att.mich_to_date(x); }), att.mich_to_nat(fields[7]), att.mich_to_option(fields[8], x => { return att.mich_to_bytes(x); }), att.mich_to_option(fields[9], x => { return att.mich_to_bytes(x); }));
 };
-export type authorizations_key = att.Address;
-export const authorizations_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
-export type authorizations_container = Array<authorizations_key>;
-export const authorizations_container_mich_type: att.MichelineType = att.list_annot_to_mich_type(att.prim_annot_to_mich_type("address", []), []);
+export type authorised_key = att.Address;
+export type sales_key = att.Nat;
+export const authorised_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
+export const sales_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("nat", []);
+export type sales_value = sale;
+export const sales_value_mich_type: att.MichelineType = att.pair_array_to_mich_type([
+    att.prim_annot_to_mich_type("address", ["%sale_contract"]),
+    att.pair_array_to_mich_type([
+        att.prim_annot_to_mich_type("nat", ["%sale_token_id"]),
+        att.pair_array_to_mich_type([
+            att.prim_annot_to_mich_type("address", ["%sale_seller"]),
+            att.pair_array_to_mich_type([
+                att.prim_annot_to_mich_type("nat", ["%sale_price_per_item"]),
+                att.pair_array_to_mich_type([
+                    att.prim_annot_to_mich_type("nat", ["%sale_qty"]),
+                    att.pair_array_to_mich_type([
+                        att.option_annot_to_mich_type(att.prim_annot_to_mich_type("timestamp", []), ["%sale_start"]),
+                        att.pair_array_to_mich_type([
+                            att.option_annot_to_mich_type(att.prim_annot_to_mich_type("timestamp", []), ["%sale_end"]),
+                            att.pair_array_to_mich_type([
+                                att.prim_annot_to_mich_type("nat", ["%sale_version"]),
+                                att.pair_array_to_mich_type([
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data_type"]),
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data"])
+                                ], [])
+                            ], [])
+                        ], [])
+                    ], [])
+                ], [])
+            ], [])
+        ], [])
+    ], [])
+], []);
+export const mich_to_sales_value = (v: att.Micheline, collapsed: boolean = false): sales_value => {
+    return mich_to_sale(v, collapsed);
+};
+export type authorised_container = Array<authorised_key>;
+export type sales_container = Array<[
+    sales_key,
+    sales_value
+]>;
+export const authorised_container_mich_type: att.MichelineType = att.list_annot_to_mich_type(att.prim_annot_to_mich_type("address", []), []);
+export const sales_container_mich_type: att.MichelineType = att.pair_to_mich_type("map", att.prim_annot_to_mich_type("nat", []), att.pair_array_to_mich_type([
+    att.prim_annot_to_mich_type("address", ["%sale_contract"]),
+    att.pair_array_to_mich_type([
+        att.prim_annot_to_mich_type("nat", ["%sale_token_id"]),
+        att.pair_array_to_mich_type([
+            att.prim_annot_to_mich_type("address", ["%sale_seller"]),
+            att.pair_array_to_mich_type([
+                att.prim_annot_to_mich_type("nat", ["%sale_price_per_item"]),
+                att.pair_array_to_mich_type([
+                    att.prim_annot_to_mich_type("nat", ["%sale_qty"]),
+                    att.pair_array_to_mich_type([
+                        att.option_annot_to_mich_type(att.prim_annot_to_mich_type("timestamp", []), ["%sale_start"]),
+                        att.pair_array_to_mich_type([
+                            att.option_annot_to_mich_type(att.prim_annot_to_mich_type("timestamp", []), ["%sale_end"]),
+                            att.pair_array_to_mich_type([
+                                att.prim_annot_to_mich_type("nat", ["%sale_version"]),
+                                att.pair_array_to_mich_type([
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data_type"]),
+                                    att.option_annot_to_mich_type(att.prim_annot_to_mich_type("bytes", []), ["%sale_data"])
+                                ], [])
+                            ], [])
+                        ], [])
+                    ], [])
+                ], [])
+            ], [])
+        ], [])
+    ], [])
+], []));
 const declare_ownership_arg_to_mich = (candidate: att.Address): att.Micheline => {
     return candidate.to_mich();
 }
 const claim_ownership_arg_to_mich = (): att.Micheline => {
     return att.unit_mich;
 }
-const set_marketplace_storage_contract_arg_to_mich = (smsc_contract: att.Address): att.Micheline => {
-    return smsc_contract.to_mich();
-}
 const set_permits_arg_to_mich = (sp_contract: att.Address): att.Micheline => {
     return sp_contract.to_mich();
 }
-const manage_authorization_arg_to_mich = (op: authorization_op): att.Micheline => {
+const manage_authorisation_arg_to_mich = (op: authorisation_op): att.Micheline => {
     return op.to_mich();
 }
 const sell_arg_to_mich = (s_sale: sale, s_seller_pubk: att.Key, s_sig: att.Signature): att.Micheline => {
@@ -230,6 +293,18 @@ const cancel_sale_arg_to_mich = (cs_sale_id: att.Nat, cs_seller_pubk: att.Key, c
         cs_sig.to_mich()
     ]);
 }
+const cancel_matching_orders_arg_to_mich = (cmo_contract: att.Address, cmo_token_id: att.Nat, cmo_owner: att.Address): att.Micheline => {
+    return att.pair_to_mich([
+        cmo_contract.to_mich(),
+        cmo_token_id.to_mich(),
+        cmo_owner.to_mich()
+    ]);
+}
+const remove_sales_arg_to_mich = (rcs_sale_ids: Array<att.Nat>): att.Micheline => {
+    return att.list_to_mich(rcs_sale_ids, x => {
+        return x.to_mich();
+    });
+}
 export class Marketplace {
     address: string | undefined;
     get_address(): att.Address {
@@ -244,10 +319,9 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
-    async deploy(owner: att.Address, marketplace_storage: att.Address, permits: att.Address, signer: att.Key, params: Partial<ex.Parameters>) {
+    async deploy(owner: att.Address, permits: att.Address, signer: att.Key, params: Partial<ex.Parameters>) {
         const address = await ex.deploy("./contracts/marketplace.arl", {
             owner: owner.to_mich(),
-            marketplace_storage: marketplace_storage.to_mich(),
             permits: permits.to_mich(),
             signer: signer.to_mich()
         }, params);
@@ -265,21 +339,15 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
-    async set_marketplace_storage_contract(smsc_contract: att.Address, params: Partial<ex.Parameters>): Promise<any> {
-        if (this.address != undefined) {
-            return await ex.call(this.address, "set_marketplace_storage_contract", set_marketplace_storage_contract_arg_to_mich(smsc_contract), params);
-        }
-        throw new Error("Contract not initialised");
-    }
     async set_permits(sp_contract: att.Address, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
             return await ex.call(this.address, "set_permits", set_permits_arg_to_mich(sp_contract), params);
         }
         throw new Error("Contract not initialised");
     }
-    async manage_authorization(op: authorization_op, params: Partial<ex.Parameters>): Promise<any> {
+    async manage_authorisation(op: authorisation_op, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
-            return await ex.call(this.address, "manage_authorization", manage_authorization_arg_to_mich(op), params);
+            return await ex.call(this.address, "manage_authorisation", manage_authorisation_arg_to_mich(op), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -301,6 +369,18 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
+    async cancel_matching_orders(cmo_contract: att.Address, cmo_token_id: att.Nat, cmo_owner: att.Address, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "cancel_matching_orders", cancel_matching_orders_arg_to_mich(cmo_contract, cmo_token_id, cmo_owner), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async remove_sales(rcs_sale_ids: Array<att.Nat>, params: Partial<ex.Parameters>): Promise<any> {
+        if (this.address != undefined) {
+            return await ex.call(this.address, "remove_sales", remove_sales_arg_to_mich(rcs_sale_ids), params);
+        }
+        throw new Error("Contract not initialised");
+    }
     async get_declare_ownership_param(candidate: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "declare_ownership", declare_ownership_arg_to_mich(candidate), params);
@@ -313,21 +393,15 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
-    async get_set_marketplace_storage_contract_param(smsc_contract: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
-        if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "set_marketplace_storage_contract", set_marketplace_storage_contract_arg_to_mich(smsc_contract), params);
-        }
-        throw new Error("Contract not initialised");
-    }
     async get_set_permits_param(sp_contract: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
             return await ex.get_call_param(this.address, "set_permits", set_permits_arg_to_mich(sp_contract), params);
         }
         throw new Error("Contract not initialised");
     }
-    async get_manage_authorization_param(op: authorization_op, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+    async get_manage_authorisation_param(op: authorisation_op, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
         if (this.address != undefined) {
-            return await ex.get_call_param(this.address, "manage_authorization", manage_authorization_arg_to_mich(op), params);
+            return await ex.get_call_param(this.address, "manage_authorisation", manage_authorisation_arg_to_mich(op), params);
         }
         throw new Error("Contract not initialised");
     }
@@ -349,17 +423,22 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
+    async get_cancel_matching_orders_param(cmo_contract: att.Address, cmo_token_id: att.Nat, cmo_owner: att.Address, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "cancel_matching_orders", cancel_matching_orders_arg_to_mich(cmo_contract, cmo_token_id, cmo_owner), params);
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_remove_sales_param(rcs_sale_ids: Array<att.Nat>, params: Partial<ex.Parameters>): Promise<att.CallParameter> {
+        if (this.address != undefined) {
+            return await ex.get_call_param(this.address, "remove_sales", remove_sales_arg_to_mich(rcs_sale_ids), params);
+        }
+        throw new Error("Contract not initialised");
+    }
     async get_owner(): Promise<att.Address> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
             return new att.Address(storage.owner);
-        }
-        throw new Error("Contract not initialised");
-    }
-    async get_marketplace_storage(): Promise<att.Address> {
-        if (this.address != undefined) {
-            const storage = await ex.get_storage(this.address);
-            return new att.Address(storage.marketplace_storage);
         }
         throw new Error("Contract not initialised");
     }
@@ -377,6 +456,13 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
+    async get_id_sequence(): Promise<att.Nat> {
+        if (this.address != undefined) {
+            const storage = await ex.get_storage(this.address);
+            return new att.Nat(storage.id_sequence);
+        }
+        throw new Error("Contract not initialised");
+    }
     async get_owner_candidate(): Promise<att.Option<att.Address>> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
@@ -384,12 +470,26 @@ export class Marketplace {
         }
         throw new Error("Contract not initialised");
     }
-    async get_authorizations(): Promise<authorizations_container> {
+    async get_authorised(): Promise<authorised_container> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
             const res: Array<att.Address> = [];
-            for (let i = 0; i < storage.authorizations.length; i++) {
-                res.push((x => { return new att.Address(x); })(storage.authorizations[i]));
+            for (let i = 0; i < storage.authorised.length; i++) {
+                res.push((x => { return new att.Address(x); })(storage.authorised[i]));
+            }
+            return res;
+        }
+        throw new Error("Contract not initialised");
+    }
+    async get_sales(): Promise<sales_container> {
+        if (this.address != undefined) {
+            const storage = await ex.get_storage(this.address);
+            let res: Array<[
+                att.Nat,
+                sale
+            ]> = [];
+            for (let e of storage.sales.entries()) {
+                res.push([(x => { return new att.Nat(x); })(e[0]), (x => { return new sale((x => { return new att.Address(x); })(x.sale_contract), (x => { return new att.Nat(x); })(x.sale_token_id), (x => { return new att.Address(x); })(x.sale_seller), (x => { return new att.Nat(x); })(x.sale_price_per_item), (x => { return new att.Nat(x); })(x.sale_qty), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_start), (x => { return new att.Option<Date>(x == null ? null : (x => { return new Date(x); })(x)); })(x.sale_end), (x => { return new att.Nat(x); })(x.sale_version), (x => { return new att.Option<att.Bytes>(x == null ? null : (x => { return new att.Bytes(x); })(x)); })(x.sale_data_type), (x => { return new att.Option<att.Bytes>(x == null ? null : (x => { return new att.Bytes(x); })(x)); })(x.sale_data)); })(e[1])]);
             }
             return res;
         }
@@ -422,6 +522,7 @@ export class Marketplace {
         throw new Error("Contract not initialised");
     }
     errors = {
+        INVALID_CALLER: att.string_to_mich("\"INVALID_CALLER\""),
         invalid_caller: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"invalid_caller\"")]),
         MISSING_SALE: att.string_to_mich("\"MISSING_SALE\""),
         SALE_NOT_STARTED: att.string_to_mich("\"SALE_NOT_STARTED\""),
@@ -434,7 +535,6 @@ export class Marketplace {
         sell_invalid_qty: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"sell_invalid_qty\"")]),
         sell_invalid_price: att.pair_to_mich([att.string_to_mich("\"INVALID_CONDITION\""), att.string_to_mich("\"sell_invalid_price\"")]),
         INSUFFICIENT_BALANCE: att.string_to_mich("\"INSUFFICIENT_BALANCE\""),
-        INVALID_CALLER: att.string_to_mich("\"INVALID_CALLER\""),
         r0: att.string_to_mich("\"INVALID_CALLER\""),
         MISSING_CANDIDATE: att.string_to_mich("\"MISSING_CANDIDATE\"")
     };

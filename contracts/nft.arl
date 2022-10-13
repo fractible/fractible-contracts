@@ -1,4 +1,4 @@
-archetype nft(owner : address, permits : address, whitelist: address, marketplace: address, marketplace_storage: address) with metadata ""
+archetype nft(owner : address, permits : address, whitelist: address, marketplace: address) with metadata ""
 
 variable token_id_sequence : nat = 0
 
@@ -59,14 +59,6 @@ entry set_marketplace(sm_marketplace : address) {
   require { p_r1 : is_not_paused() }
   effect {
     marketplace := sm_marketplace
-  }
-}
-
-entry set_marketplace_storage(sms_marketplace : address) {
-  called by owner
-  require { sm_r1 : is_not_paused() }
-  effect {
-    marketplace_storage := sms_marketplace
   }
 }
 
@@ -314,7 +306,7 @@ entry transfer_gasless (batch : list<transfer_gasless_param>) {
           end;
           ledger.add_update((td.to_dest, tid), { ledger_token_amount += td.token_amount_dest });
           if caller <> marketplace then begin
-            transfer 0tz to marketplace_storage call cancel_matching_orders<address * nat * address>((self_address, tid, %from));
+            transfer 0tz to marketplace call cancel_matching_orders<address * nat * address>((self_address, tid, %from));
           end
       end done
       done
@@ -353,7 +345,7 @@ entry %transfer (transfers : list<transfer_param>) {
         end;
         ledger.add_update((td.to_dest, tid), { ledger_token_amount += td.token_amount_dest });
         if caller <> marketplace then begin
-          transfer 0tz to marketplace_storage call cancel_matching_orders<address * nat * address>((self_address, tid, %from));
+          transfer 0tz to marketplace call cancel_matching_orders<address * nat * address>((self_address, tid, %from));
         end
       end done
     done
