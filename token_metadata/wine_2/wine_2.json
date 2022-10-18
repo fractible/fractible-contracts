@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "Shipwrecked 1907 Heidsieck",
+  "description": "",
+  "type": "wine",
+  "artifactUri": "ipfs://QmaRmLrMJecA8G1DN1tF76ECw7NdYBy6s546jiVzgb7VbQ",
+  "displayUri": "ipfs://QmaRmLrMJecA8G1DN1tF76ECw7NdYBy6s546jiVzgb7VbQ",
+  "thumbnailUri": "ipfs://QmaRmLrMJecA8G1DN1tF76ECw7NdYBy6s546jiVzgb7VbQ",
+  "externalUri": "ipfs://QmaRmLrMJecA8G1DN1tF76ECw7NdYBy6s546jiVzgb7VbQ",
+  "formats": [
+    {
+      "uri": "ipfs://QmaRmLrMJecA8G1DN1tF76ECw7NdYBy6s546jiVzgb7VbQ",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "6"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/10/2023"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "26.3%"
+    },
+    {
+      "name": "origin",
+      "value": "France"
+    },
+    {
+      "name": "production_date",
+      "value": "13/09/1907"
+    }
+  ]
+}

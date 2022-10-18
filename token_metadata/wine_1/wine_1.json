@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "Chateau d’Yquem 2018 1er cru classé supérieur",
+  "description": "",
+  "type": "wine",
+  "artifactUri": "ipfs://QmTUyGjNbSSyPwa1Pgf5tuxDFMhDC6DHcS4fx7b9XRgeCZ",
+  "displayUri": "ipfs://QmTUyGjNbSSyPwa1Pgf5tuxDFMhDC6DHcS4fx7b9XRgeCZ",
+  "thumbnailUri": "ipfs://QmTUyGjNbSSyPwa1Pgf5tuxDFMhDC6DHcS4fx7b9XRgeCZ",
+  "externalUri": "ipfs://QmTUyGjNbSSyPwa1Pgf5tuxDFMhDC6DHcS4fx7b9XRgeCZ",
+  "formats": [
+    {
+      "uri": "ipfs://QmTUyGjNbSSyPwa1Pgf5tuxDFMhDC6DHcS4fx7b9XRgeCZ",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "6"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/10/2030"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "10.3%"
+    },
+    {
+      "name": "origin",
+      "value": "France"
+    },
+    {
+      "name": "production_date",
+      "value": "13/09/2018"
+    }
+  ]
+}

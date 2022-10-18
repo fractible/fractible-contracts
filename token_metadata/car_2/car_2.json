@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "Ferrari F430 Spider V8 F1",
+  "description": "",
+  "type": "car",
+  "artifactUri": "ipfs://QmQcadjGQ1ZEVTQkJuGDa57KJAHp3fm5eR6pCU783JyQJ6",
+  "displayUri": "ipfs://QmQcadjGQ1ZEVTQkJuGDa57KJAHp3fm5eR6pCU783JyQJ6",
+  "thumbnailUri": "ipfs://QmQcadjGQ1ZEVTQkJuGDa57KJAHp3fm5eR6pCU783JyQJ6",
+  "externalUri": "ipfs://QmQcadjGQ1ZEVTQkJuGDa57KJAHp3fm5eR6pCU783JyQJ6",
+  "formats": [
+    {
+      "uri": "ipfs://QmQcadjGQ1ZEVTQkJuGDa57KJAHp3fm5eR6pCU783JyQJ6",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "10"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/01/2025"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "17.5%"
+    },
+    {
+      "name": "origin",
+      "value": "Italy"
+    },
+    {
+      "name": "production_date",
+      "value": "21/06/2007"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "Rolex GMT-Master II 126710BLNR 2022",
+  "description": "",
+  "type": "watch",
+  "artifactUri": "ipfs://QmU5D7FRkib4GbCVRrgeA7iTobUGHMDKKv3hobFbqwfPkz",
+  "displayUri": "ipfs://QmU5D7FRkib4GbCVRrgeA7iTobUGHMDKKv3hobFbqwfPkz",
+  "thumbnailUri": "ipfs://QmU5D7FRkib4GbCVRrgeA7iTobUGHMDKKv3hobFbqwfPkz",
+  "externalUri": "ipfs://QmU5D7FRkib4GbCVRrgeA7iTobUGHMDKKv3hobFbqwfPkz",
+  "formats": [
+    {
+      "uri": "ipfs://QmU5D7FRkib4GbCVRrgeA7iTobUGHMDKKv3hobFbqwfPkz",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "10"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/10/2028"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "12.3%"
+    },
+    {
+      "name": "origin",
+      "value": "Switzerland"
+    },
+    {
+      "name": "production_date",
+      "value": "01/01/2018"
+    }
+  ]
+}

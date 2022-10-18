@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "1975 Maserati Bora 4900",
+  "description": "",
+  "type": "car",
+  "artifactUri": "ipfs://QmetGm5sVxQHR3aKbyV4wMoH1oPxYBuU3Gixiic4ZZ8Kfk",
+  "displayUri": "ipfs://QmetGm5sVxQHR3aKbyV4wMoH1oPxYBuU3Gixiic4ZZ8Kfk",
+  "thumbnailUri": "ipfs://QmetGm5sVxQHR3aKbyV4wMoH1oPxYBuU3Gixiic4ZZ8Kfk",
+  "externalUri": "ipfs://QmetGm5sVxQHR3aKbyV4wMoH1oPxYBuU3Gixiic4ZZ8Kfk",
+  "formats": [
+    {
+      "uri": "ipfs://QmetGm5sVxQHR3aKbyV4wMoH1oPxYBuU3Gixiic4ZZ8Kfk",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "10"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/01/2024"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "11.5%"
+    },
+    {
+      "name": "origin",
+      "value": "Italy"
+    },
+    {
+      "name": "production_date",
+      "value": "11/06/1975"
+    }
+  ]
+}

@@ -45,8 +45,8 @@ import {add as add_permit, permits} from "./binding/permits";
 
 const alice = get_account("alice");
 const bob = get_account("bob");
-const admin = get_account("carl");
-const user1 = get_account("bootstrap1");
+const carl = get_account("carl");
+const admin = get_account("bootstrap1");
 const user2 = get_account("bootstrap2");
 const user3 = get_account("bootstrap3");
 const user4 = get_account("bootstrap4");
@@ -97,26 +97,26 @@ const get_permit_data = (ptps: Bytes, contract: Address, permit_counter: Nat | u
 /* Scenarios --------------------------------------------------------------- */
 describe("Contracts deployment", async () => {
 	it("Whitelist storage contract deployment should succeed", async () => {
-		await whitelist_storage.deploy(alice.get_address(), {as: alice});
+		await whitelist_storage.deploy(admin.get_address(), {as: admin});
 	});
 	it("Whitelist contract deployment should succeed", async () => {
-		await whitelist.deploy(alice.get_address(), whitelist_storage.get_address(), {as: alice});
+		await whitelist.deploy(admin.get_address(), whitelist_storage.get_address(), {as: admin});
 	});
 	it("Permits contract deployment should succeed", async () => {
-		await permits.deploy(alice.get_address(), {as: alice});
+		await permits.deploy(admin.get_address(), {as: admin});
 	});
 	it("Sales contract deployment should succeed", async () => {
-		await marketplace.deploy(alice.get_address(),
+		await marketplace.deploy(admin.get_address(),
 			permits.get_address(),
 			admin.get_public_key(),
-			{as: alice});
+			{as: admin});
 	});
 	it("NFT contract deployment should succeed", async () => {
-		await nft.deploy(alice.get_address(),
+		await nft.deploy(admin.get_address(),
 			permits.get_address(),
 			whitelist.get_address(),
 			marketplace.get_address(),
-			{as: alice});
+			{as: admin});
 	});
 });
 
@@ -125,20 +125,21 @@ describe("Set up", async () => {
 		await exec_batch([
 				await whitelist.get_update_transfer_list_param(new Nat(0),
 					Option.Some<[boolean, Nat[]]>([true, [new Nat(0)]]),
-					{as: alice}),
-				await whitelist_storage.get_add_whitelister_param(whitelist.get_address(), {as: alice}),
-				await whitelist.get_add_whitelister_param(alice.get_address(), {as: alice}),
-				await whitelist.get_add_super_user_param(alice.get_address(), {as: alice}),
+					{as: admin}),
+				await whitelist_storage.get_add_whitelister_param(whitelist.get_address(), {as: admin}),
+				await whitelist.get_add_whitelister_param(admin.get_address(), {as: admin}),
+				await whitelist.get_add_super_user_param(admin.get_address(), {as: admin}),
 				await whitelist.get_update_users_param([
 					[alice.get_address(), Option.Some<Nat>(new Nat(0))],
 					[bob.get_address(), Option.Some<Nat>(new Nat(0))],
+					[carl.get_address(), Option.Some<Nat>(new Nat(0))],
 					[admin.get_address(), Option.Some<Nat>(new Nat(0))]
-				], {as: alice}),
-				await nft.get_set_marketplace_param(marketplace.get_address(), {as: alice}),
-				await permits.get_manage_consumer_param(new add_permit(nft.get_address()), {as: alice}),
-				await permits.get_manage_consumer_param(new add_permit(marketplace.get_address()), {as: alice})
+				], {as: admin}),
+				await nft.get_set_marketplace_param(marketplace.get_address(), {as: admin}),
+				await permits.get_manage_consumer_param(new add_permit(nft.get_address()), {as: admin}),
+				await permits.get_manage_consumer_param(new add_permit(marketplace.get_address()), {as: admin})
 			],
-			{as: alice}
+			{as: admin}
 		)
 	});
 
@@ -152,13 +153,71 @@ describe("Set up", async () => {
 			permits.get_address(),
 			counter);
 		const signature = await alice.sign(after_permit_data)
-		await nft.update_operator_for_all_gasless(data, alice.get_public_key(), signature, {as: bob});
+		await nft.update_operator_for_all_gasless(data, alice.get_public_key(), signature, {as: admin});
 	});
 });
+
 describe("Minting", async () => {
 	it("Mint NFT", async () => {
-		await nft.mint([new mint_param(alice.get_address(), new Nat(10)), new mint_param(bob.get_address(),
-			new Nat(10)), new mint_param(admin.get_address(), new Nat(10))], [["", Bytes.hex_encode("ipfs://QmQ4x5BR7ecGVjyhZ7o87m2rPgzp8sBzxFbM4gtHiQQ6ay")]], {as: alice});
+		await exec_batch([
+			//Car minting (0,1,2)
+			await nft.get_mint_param([
+				new mint_param(alice.get_address(), new Nat(3)),
+				new mint_param(bob.get_address(), new Nat(4)),
+				new mint_param(carl.get_address(), new Nat(3))],
+				[["", Bytes.hex_encode("ipfs://QmSSLjccM2YVr3VVQpAQXrBfGFtDnRkFLqCA3CPiyJk1Mb")]], {as: admin}
+			),
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(4)),
+					new mint_param(bob.get_address(), new Nat(3)),
+					new mint_param(carl.get_address(), new Nat(3))],
+				[["", Bytes.hex_encode("ipfs://QmfPTb9KgikAQBbDJicAPWqyxmxGDfkUdce4gAk39akacG")]], {as: admin}
+			),
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(3)),
+					new mint_param(bob.get_address(), new Nat(3)),
+					new mint_param(carl.get_address(), new Nat(4))],
+				[["", Bytes.hex_encode("ipfs://QmaTDjd3DUBsH34y7YGxEPUgzqrAgwEW6okorQ56o2SaRn")]], {as: admin}
+			),
+			//Watch minting (3,4,5)
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(3)),
+					new mint_param(bob.get_address(), new Nat(4)),
+					new mint_param(carl.get_address(), new Nat(3))],
+				[["", Bytes.hex_encode("ipfs://QmXe1fY2BnWVpRmJb26afD3R2W1H2PfkM77G2M6RpWLyEw")]], {as: admin}
+			),
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(4)),
+					new mint_param(bob.get_address(), new Nat(3)),
+					new mint_param(carl.get_address(), new Nat(3))],
+				[["", Bytes.hex_encode("ipfs://QmSno3r8aMU3BEfj6UyLaqi8QfmnehjJcPSb6CGAEDkWpm")]], {as: admin}
+			),
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(3)),
+					new mint_param(bob.get_address(), new Nat(3)),
+					new mint_param(carl.get_address(), new Nat(4))],
+				[["", Bytes.hex_encode("ipfs://Qmc6XDj8pGYZqcQZpJwXkB61hceXt5U16n3csWYSdFiJ27")]], {as: admin}
+			),
+			//Wine minting (6,7,8)
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(3)),
+					new mint_param(bob.get_address(), new Nat(4)),
+					new mint_param(carl.get_address(), new Nat(3))],
+				[["", Bytes.hex_encode("ipfs://Qmeod88J1M4rfkpndBk4Y6ARfNPwiWbx5dGVuZrvzQy3LV")]], {as: admin}
+			),
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(4)),
+					new mint_param(bob.get_address(), new Nat(3)),
+					new mint_param(carl.get_address(), new Nat(3))],
+				[["", Bytes.hex_encode("ipfs://Qmb9g7hnGrMERzFaEBBQ37QrRUbTJjDFgZHpJVDUewxUWb")]], {as: admin}
+			),
+			await nft.get_mint_param([
+					new mint_param(alice.get_address(), new Nat(3)),
+					new mint_param(bob.get_address(), new Nat(3)),
+					new mint_param(carl.get_address(), new Nat(4))],
+				[["", Bytes.hex_encode("ipfs://QmTMU5zh3WB6Swc3VFLJwi6po1U92gCxYHRQA6wcJzngwn")]], {as: admin}
+			)
+		], {as: admin})
 	});
 });
 
@@ -184,7 +243,7 @@ describe("Marketplace tests", async () => {
 			permits.get_address(),
 			counter);
 		const signature = await alice.sign(after_permit_data)
-		await marketplace.sell(sale_data, alice.get_public_key(), signature, {as: bob})
+		await marketplace.sell(sale_data, alice.get_public_key(), signature, {as: admin})
 	});
 
 	it("Buy NFT as User1 should fail", async () => {
@@ -194,14 +253,14 @@ describe("Marketplace tests", async () => {
 				new Nat(0),
 				new Nat(1)
 			)
-			const permit = await permits.get_permits_value(user1.get_address())
+			const permit = await permits.get_permits_value(user2.get_address())
 			const counter = permit?.counter
 			const packed_buy_data = pack(buy_data.to_mich(), buy_param_mich_type)
 			const after_permit_data = await get_permit_data(
 				packed_buy_data,
 				permits.get_address(),
 				counter);
-			const signature = await user1.sign(after_permit_data)
+			const signature = await user2.sign(after_permit_data)
 
 			const permit_auth = await permits.get_permits_value(admin.get_address())
 			const counter_auth = permit_auth?.counter
@@ -212,7 +271,7 @@ describe("Marketplace tests", async () => {
 				permits.get_address(),
 				counter_auth);
 			const signature_auth = await admin.sign(after_permit_sig_data)
-			await marketplace.buy(buy_data, user1.get_public_key(), signature, signature_auth, {as: alice})
+			await marketplace.buy(buy_data, user2.get_public_key(), signature, signature_auth, {as: admin})
 		}, whitelist.errors.TO_RESTRICTED);
 
 	});
@@ -240,7 +299,7 @@ describe("Marketplace tests", async () => {
 			permits.get_address(),
 			counter_auth);
 		const signature_auth = await admin.sign(after_permit_sig_data)
-		await marketplace.buy(buy_data, bob.get_public_key(), signature, signature_auth, {as: alice})
+		await marketplace.buy(buy_data, bob.get_public_key(), signature, signature_auth, {as: admin})
 	});
 });
 

@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "Patek Philippe Nautilus 5712/1A",
+  "description": "",
+  "type": "watch",
+  "artifactUri": "ipfs://QmXyzSCNXhkN14nKrndXccmAdHhUdTh6bRwzzx6v9PUHfE",
+  "displayUri": "ipfs://QmXyzSCNXhkN14nKrndXccmAdHhUdTh6bRwzzx6v9PUHfE",
+  "thumbnailUri": "ipfs://QmXyzSCNXhkN14nKrndXccmAdHhUdTh6bRwzzx6v9PUHfE",
+  "externalUri": "ipfs://QmXyzSCNXhkN14nKrndXccmAdHhUdTh6bRwzzx6v9PUHfE",
+  "formats": [
+    {
+      "uri": "ipfs://QmXyzSCNXhkN14nKrndXccmAdHhUdTh6bRwzzx6v9PUHfE",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "10"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/10/2026"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "16.3%"
+    },
+    {
+      "name": "origin",
+      "value": "Switzerland"
+    },
+    {
+      "name": "production_date",
+      "value": "01/01/2017"
+    }
+  ]
+}

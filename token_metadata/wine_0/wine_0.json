@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "Chateau Cheval Blanc 1947",
+  "description": "",
+  "type": "wine",
+  "artifactUri": "ipfs://QmWTzkffLXhBQAUdw7RwdY7y41vnAc3J4vPFqRK2t7qG6g",
+  "displayUri": "ipfs://QmWTzkffLXhBQAUdw7RwdY7y41vnAc3J4vPFqRK2t7qG6g",
+  "thumbnailUri": "ipfs://QmWTzkffLXhBQAUdw7RwdY7y41vnAc3J4vPFqRK2t7qG6g",
+  "externalUri": "ipfs://QmWTzkffLXhBQAUdw7RwdY7y41vnAc3J4vPFqRK2t7qG6g",
+  "formats": [
+    {
+      "uri": "ipfs://QmWTzkffLXhBQAUdw7RwdY7y41vnAc3J4vPFqRK2t7qG6g",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "6"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/10/2024"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "20.3%"
+    },
+    {
+      "name": "origin",
+      "value": "France"
+    },
+    {
+      "name": "production_date",
+      "value": "11/09/1947"
+    }
+  ]
+}

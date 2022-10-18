@@ -1,0 +1,38 @@
+{
+  "decimals": 0,
+  "name": "1997 Porsche 911",
+  "description": "",
+  "type": "car",
+  "artifactUri": "ipfs://QmZQgMBGoJFzCq9uAu4u5Fmjq8xcEznnHfFJx3y3zJPvJP",
+  "displayUri": "ipfs://QmZQgMBGoJFzCq9uAu4u5Fmjq8xcEznnHfFJx3y3zJPvJP",
+  "thumbnailUri": "ipfs://QmZQgMBGoJFzCq9uAu4u5Fmjq8xcEznnHfFJx3y3zJPvJP",
+  "externalUri": "ipfs://QmZQgMBGoJFzCq9uAu4u5Fmjq8xcEznnHfFJx3y3zJPvJP",
+  "formats": [
+    {
+      "uri": "ipfs://QmZQgMBGoJFzCq9uAu4u5Fmjq8xcEznnHfFJx3y3zJPvJP",
+      "mimeType": "image/png"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "shares_number",
+      "value": "10"
+    },
+    {
+      "name": "appreciation_period",
+      "value": "01/01/2026"
+    },
+    {
+      "name": "historical_appreciation_rate",
+      "value": "13.5%"
+    },
+    {
+      "name": "origin",
+      "value": "Germany"
+    },
+    {
+      "name": "production_date",
+      "value": "21/06/1997"
+    }
+  ]
+}
