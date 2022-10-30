@@ -31,7 +31,7 @@ const put_arg_to_mich = (k: att.Address, v: att.Nat): att.Micheline => {
 const update_arg_to_mich = (k: att.Address, v: att.Option<att.Nat>): att.Micheline => {
     return att.pair_to_mich([
         k.to_mich(),
-        v.to_mich()
+        v.to_mich((x => { return x.to_mich(); }))
     ]);
 }
 const view_get_user_id_arg_to_mich = (k: att.Address): att.Micheline => {
@@ -55,9 +55,9 @@ export class Whitelist_storage {
         throw new Error("Contract not initialised");
     }
     async deploy(admin: att.Address, params: Partial<ex.Parameters>) {
-        const address = await ex.deploy("./contracts/whitelist_storage.arl", {
+        const address = (await ex.deploy("./contracts/whitelist_storage.arl", {
             admin: admin.to_mich()
-        }, params);
+        }, params)).address;
         this.address = address;
     }
     async set_metadata_uri(idata: att.Bytes, params: Partial<ex.Parameters>): Promise<any> {
@@ -159,7 +159,7 @@ export class Whitelist_storage {
     async view_get_user_id(k: att.Address, params: Partial<ex.Parameters>): Promise<att.Option<att.Nat>> {
         if (this.address != undefined) {
             const mich = await ex.exec_view(this.get_address(), "get_user_id", view_get_user_id_arg_to_mich(k), params);
-            return new att.Option<att.Nat>(mich == null ? null : (x => { return new att.Nat(x); })(mich));
+            return new att.Option<att.Nat>(mich.value == null ? null : (x => { return new att.Nat(x); })(mich.value));
         }
         throw new Error("Contract not initialised");
     }
@@ -191,9 +191,9 @@ export class Whitelist_storage {
     async get_users_value(key: att.Address): Promise<att.Nat | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.users), key.to_mich(), att.prim_annot_to_mich_type("address", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.users), key.to_mich(), att.prim_annot_to_mich_type("address", []), att.prim_annot_to_mich_type("nat", [])), collapsed = true;
             if (data != undefined) {
-                return att.mich_to_nat(data);
+                return new att.Nat(data);
             }
             else {
                 return undefined;
@@ -204,7 +204,7 @@ export class Whitelist_storage {
     async has_users_value(key: att.Address): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.users), key.to_mich(), att.prim_annot_to_mich_type("address", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.users), key.to_mich(), att.prim_annot_to_mich_type("address", []), att.prim_annot_to_mich_type("nat", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }
@@ -217,9 +217,9 @@ export class Whitelist_storage {
     async get_metadata_value(key: string): Promise<att.Bytes | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", []), att.prim_annot_to_mich_type("bytes", [])), collapsed = true;
             if (data != undefined) {
-                return att.mich_to_bytes(data);
+                return new att.Bytes(data);
             }
             else {
                 return undefined;
@@ -230,7 +230,7 @@ export class Whitelist_storage {
     async has_metadata_value(key: string): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", []), att.prim_annot_to_mich_type("bytes", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }

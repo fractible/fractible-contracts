@@ -18,16 +18,6 @@ export const transfer_list_mich_type: att.MichelineType = att.pair_array_to_mich
     att.prim_annot_to_mich_type("bool", ["%unrestricted"]),
     att.list_annot_to_mich_type(att.prim_annot_to_mich_type("nat", []), ["%allowed_transfer_lists"])
 ], []);
-export const mich_to_transfer_list = (v: att.Micheline, collapsed: boolean = false): transfer_list => {
-    let fields: att.Micheline[] = [];
-    if (collapsed) {
-        fields = att.mich_to_pairs(v);
-    }
-    else {
-        fields = att.annotated_mich_to_array(v, transfer_list_mich_type);
-    }
-    return new transfer_list(att.mich_to_bool(fields[0]), att.mich_to_list(fields[1], x => { return att.mich_to_nat(x); }));
-};
 export type whitelister_key = att.Address;
 export const whitelister_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
 export type whitelister_container = Array<whitelister_key>;
@@ -83,7 +73,7 @@ const assert_transfer_list_arg_to_mich = (from_transfer_list_id: att.Nat, to_tra
 const update_user_arg_to_mich = (user: att.Address, transfer_list_id: att.Option<att.Nat>): att.Micheline => {
     return att.pair_to_mich([
         user.to_mich(),
-        transfer_list_id.to_mich()
+        transfer_list_id.to_mich((x => { return x.to_mich(); }))
     ]);
 }
 const update_users_arg_to_mich = (utl: Array<[
@@ -91,7 +81,7 @@ const update_users_arg_to_mich = (utl: Array<[
     att.Option<att.Nat>
 ]>): att.Micheline => {
     return att.list_to_mich(utl, x => {
-        return att.pair_to_mich([x[0].to_mich(), x[1].to_mich()]);
+        return att.pair_to_mich([x[0].to_mich(), x[1].to_mich((x => { return x.to_mich(); }))]);
     });
 }
 const update_transfer_list_arg_to_mich = (transfer_list_id: att.Nat, u: att.Option<[
@@ -100,7 +90,9 @@ const update_transfer_list_arg_to_mich = (transfer_list_id: att.Nat, u: att.Opti
 ]>): att.Micheline => {
     return att.pair_to_mich([
         transfer_list_id.to_mich(),
-        u.to_mich()
+        u.to_mich((x => { return att.pair_to_mich([att.bool_to_mich(x[0]), att.list_to_mich(x[1], x => {
+                return x.to_mich();
+            })]); }))
     ]);
 }
 const get_user_arg_to_mich = (user: att.Address): att.Micheline => {
@@ -116,7 +108,7 @@ const view_assert_transfer_arg_to_mich = (sender: att.Address, from: att.Address
         to.to_mich()
     ]);
 }
-export const deploy_get_user_callback = async (): Promise<string> => {
+export const deploy_get_user_callback = async (): Promise<att.DeployResult> => {
     return await ex.deploy_callback("get_user", att.option_annot_to_mich_type(att.prim_annot_to_mich_type("nat", []), []));
 };
 export class Whitelist {
@@ -138,12 +130,12 @@ export class Whitelist {
         throw new Error("Contract not initialised");
     }
     async deploy(admin: att.Address, storage: att.Address, params: Partial<ex.Parameters>) {
-        const address = await ex.deploy("./contracts/whitelist.arl", {
+        const address = (await ex.deploy("./contracts/whitelist.arl", {
             admin: admin.to_mich(),
             storage: storage.to_mich()
-        }, params);
+        }, params)).address;
         this.address = address;
-        this.get_user_callback_address = await deploy_get_user_callback();
+        this.get_user_callback_address = (await deploy_get_user_callback()).address;
     }
     async declare_admin(candidate: att.Address, params: Partial<ex.Parameters>): Promise<any> {
         if (this.address != undefined) {
@@ -356,14 +348,14 @@ export class Whitelist {
     async view_assert_receiver(addr: att.Address, params: Partial<ex.Parameters>): Promise<boolean> {
         if (this.address != undefined) {
             const mich = await ex.exec_view(this.get_address(), "assert_receiver", view_assert_receiver_arg_to_mich(addr), params);
-            return mich;
+            return mich.value.prim ? (mich.value.prim == "True" ? true : false) : mich.value;
         }
         throw new Error("Contract not initialised");
     }
     async view_assert_transfer(sender: att.Address, from: att.Address, to: att.Address, params: Partial<ex.Parameters>): Promise<string> {
         if (this.address != undefined) {
             const mich = await ex.exec_view(this.get_address(), "assert_transfer", view_assert_transfer_arg_to_mich(sender, from, to), params);
-            return mich;
+            return mich.value;
         }
         throw new Error("Contract not initialised");
     }
@@ -391,7 +383,7 @@ export class Whitelist {
     async get_paused(): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            return storage.paused;
+            return storage.paused.prim ? (storage.paused.prim == "True" ? true : false) : storage.paused;
         }
         throw new Error("Contract not initialised");
     }
@@ -420,9 +412,11 @@ export class Whitelist {
     async get_transfer_lists_value(key: att.Nat): Promise<transfer_list | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), att.prim_annot_to_mich_type("nat", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), att.prim_annot_to_mich_type("nat", []), att.prim_annot_to_mich_type("record", [])), collapsed = true;
             if (data != undefined) {
-                return mich_to_transfer_list(data, collapsed);
+                return new transfer_list((x => { return x.prim ? (x.prim == "True" ? true : false) : x; })(data.unrestricted), (x => { const res: Array<att.Nat> = []; for (let i = 0; i < x.length; i++) {
+                    res.push((x => { return new att.Nat(x); })(x[i]));
+                } return res; })(data.allowed_transfer_lists));
             }
             else {
                 return undefined;
@@ -433,7 +427,7 @@ export class Whitelist {
     async has_transfer_lists_value(key: att.Nat): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), att.prim_annot_to_mich_type("nat", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.transfer_lists), key.to_mich(), att.prim_annot_to_mich_type("nat", []), att.prim_annot_to_mich_type("record", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }

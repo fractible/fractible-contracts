@@ -83,7 +83,7 @@ export class sale implements att.ArchetypeType {
         return JSON.stringify(this, null, 2);
     }
     to_mich(): att.Micheline {
-        return att.pair_to_mich([this.sale_contract.to_mich(), att.pair_to_mich([this.sale_token_id.to_mich(), att.pair_to_mich([this.sale_seller.to_mich(), att.pair_to_mich([this.sale_price_per_item.to_mich(), att.pair_to_mich([this.sale_qty.to_mich(), att.pair_to_mich([this.sale_start.to_mich(), att.pair_to_mich([this.sale_end.to_mich(), att.pair_to_mich([this.sale_version.to_mich(), att.pair_to_mich([this.sale_data_type.to_mich(), this.sale_data.to_mich()])])])])])])])])]);
+        return att.pair_to_mich([this.sale_contract.to_mich(), att.pair_to_mich([this.sale_token_id.to_mich(), att.pair_to_mich([this.sale_seller.to_mich(), att.pair_to_mich([this.sale_price_per_item.to_mich(), att.pair_to_mich([this.sale_qty.to_mich(), att.pair_to_mich([this.sale_start.to_mich((x => { return att.date_to_mich(x); })), att.pair_to_mich([this.sale_end.to_mich((x => { return att.date_to_mich(x); })), att.pair_to_mich([this.sale_version.to_mich(), att.pair_to_mich([this.sale_data_type.to_mich((x => { return x.to_mich(); })), this.sale_data.to_mich((x => { return x.to_mich(); }))])])])])])])])])]);
     }
     equals(v: sale): boolean {
         return (this.sale_contract.equals(v.sale_contract) && this.sale_contract.equals(v.sale_contract) && this.sale_token_id.equals(v.sale_token_id) && this.sale_seller.equals(v.sale_seller) && this.sale_price_per_item.equals(v.sale_price_per_item) && this.sale_qty.equals(v.sale_qty) && this.sale_start.equals(v.sale_start) && this.sale_end.equals(v.sale_end) && this.sale_version.equals(v.sale_version) && this.sale_data_type.equals(v.sale_data_type) && this.sale_data.equals(v.sale_data));
@@ -139,56 +139,6 @@ export const sale_mich_type: att.MichelineType = att.pair_array_to_mich_type([
         ], [])
     ], [])
 ], []);
-export const mich_to_transfer_param = (v: att.Micheline, collapsed: boolean = false): transfer_param => {
-    let fields: att.Micheline[] = [];
-    if (collapsed) {
-        fields = att.mich_to_pairs(v);
-    }
-    else {
-        fields = att.annotated_mich_to_array(v, transfer_param_mich_type);
-    }
-    return new transfer_param(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_nat(fields[2]));
-};
-export const mich_to_buy_param = (v: att.Micheline, collapsed: boolean = false): buy_param => {
-    let fields: att.Micheline[] = [];
-    if (collapsed) {
-        fields = att.mich_to_pairs(v);
-    }
-    else {
-        fields = att.annotated_mich_to_array(v, buy_param_mich_type);
-    }
-    return new buy_param(att.mich_to_nat(fields[0]), att.mich_to_nat(fields[1]));
-};
-export const mich_to_auth_buy_param = (v: att.Micheline, collapsed: boolean = false): auth_buy_param => {
-    let fields: att.Micheline[] = [];
-    if (collapsed) {
-        fields = att.mich_to_pairs(v);
-    }
-    else {
-        fields = att.annotated_mich_to_array(v, auth_buy_param_mich_type);
-    }
-    return new auth_buy_param(mich_to_buy_param(fields[0], collapsed), att.mich_to_signature(fields[1]));
-};
-export const mich_to_balance_of_request = (v: att.Micheline, collapsed: boolean = false): balance_of_request => {
-    let fields: att.Micheline[] = [];
-    if (collapsed) {
-        fields = att.mich_to_pairs(v);
-    }
-    else {
-        fields = att.annotated_mich_to_array(v, balance_of_request_mich_type);
-    }
-    return new balance_of_request(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]));
-};
-export const mich_to_sale = (v: att.Micheline, collapsed: boolean = false): sale => {
-    let fields: att.Micheline[] = [];
-    if (collapsed) {
-        fields = att.mich_to_pairs(v);
-    }
-    else {
-        fields = att.annotated_mich_to_array(v, sale_mich_type);
-    }
-    return new sale(att.mich_to_address(fields[0]), att.mich_to_nat(fields[1]), att.mich_to_address(fields[2]), att.mich_to_nat(fields[3]), att.mich_to_nat(fields[4]), att.mich_to_option(fields[5], x => { return att.mich_to_date(x); }), att.mich_to_option(fields[6], x => { return att.mich_to_date(x); }), att.mich_to_nat(fields[7]), att.mich_to_option(fields[8], x => { return att.mich_to_bytes(x); }), att.mich_to_option(fields[9], x => { return att.mich_to_bytes(x); }));
-};
 export type authorised_key = att.Address;
 export type sales_key = att.Nat;
 export const authorised_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
@@ -222,9 +172,6 @@ export const sales_value_mich_type: att.MichelineType = att.pair_array_to_mich_t
         ], [])
     ], [])
 ], []);
-export const mich_to_sales_value = (v: att.Micheline, collapsed: boolean = false): sales_value => {
-    return mich_to_sale(v, collapsed);
-};
 export type authorised_container = Array<authorised_key>;
 export type sales_container = Array<[
     sales_key,
@@ -323,11 +270,11 @@ export class Marketplace {
         throw new Error("Contract not initialised");
     }
     async deploy(owner: att.Address, permits: att.Address, signer: att.Key, params: Partial<ex.Parameters>) {
-        const address = await ex.deploy("./contracts/marketplace.arl", {
+        const address = (await ex.deploy("./contracts/marketplace.arl", {
             owner: owner.to_mich(),
             permits: permits.to_mich(),
             signer: signer.to_mich()
-        }, params);
+        }, params)).address;
         this.address = address;
     }
     async declare_ownership(candidate: att.Address, params: Partial<ex.Parameters>): Promise<any> {
@@ -501,9 +448,9 @@ export class Marketplace {
     async get_metadata_value(key: string): Promise<att.Bytes | undefined> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", []), att.prim_annot_to_mich_type("bytes", [])), collapsed = true;
             if (data != undefined) {
-                return att.mich_to_bytes(data);
+                return new att.Bytes(data);
             }
             else {
                 return undefined;
@@ -514,7 +461,7 @@ export class Marketplace {
     async has_metadata_value(key: string): Promise<boolean> {
         if (this.address != undefined) {
             const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", [])), collapsed = true;
+            const data = await ex.get_big_map_value(BigInt(storage.metadata), att.string_to_mich(key), att.prim_annot_to_mich_type("string", []), att.prim_annot_to_mich_type("bytes", [])), collapsed = true;
             if (data != undefined) {
                 return true;
             }
